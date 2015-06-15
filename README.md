@@ -1,2 +1,2 @@
-# CafeMitote
-Sistema para Café Mitote
+# CasaMitote
+Sistema para Casa Mitote
