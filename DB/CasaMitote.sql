@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 17, 2015 at 11:19 AM
+-- Generation Time: Jun 17, 2015 at 01:53 PM
 -- Server version: 5.5.43-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.9
 
@@ -104,6 +104,14 @@ CREATE TABLE IF NOT EXISTS `TiposDeCuentas` (
   PRIMARY KEY (`idTipoDeCuenta`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `TiposDeCuentas`
+--
+
+INSERT INTO `TiposDeCuentas` (`idTipoDeCuenta`, `nombre`, `idTipoDeCuentaPadre`) VALUES
+(5, 'gerente', 99),
+(99, 'root', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -134,6 +142,14 @@ CREATE TABLE IF NOT EXISTS `Usuario` (
   `activo` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`idUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `Usuario`
+--
+
+INSERT INTO `Usuario` (`idUsuario`, `idTipoDeCuenta`, `nombres`, `apellidos`, `telefono`, `password`, `correo`, `activo`) VALUES
+(1000, 5, 'Alan', 'Sánchez', NULL, 'testGerente', NULL, 1),
+(9810, 99, 'Root', 'Root', NULL, 'testRoot', NULL, 1);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
