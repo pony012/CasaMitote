@@ -9,12 +9,12 @@
 					<fieldset>
 						<legend>Categoría de Productos</legend>
 						<div class="form-group">
-							<label for="">Nombre</label>
-							<input type="text" class="form-control" placeholder="Nombre" name="nombre">
+							<label for="nombre">Nombre</label>
+							<input type="text" class="form-control" placeholder="Nombre" name="nombre" id="nombre">
 						</div>
 						<div class="form-group">
-							<label for="">Área</label>
-							<input type="text" class="form-control" placeholder="Área" name="area">
+							<label for="area">Área</label>
+							<input type="text" class="form-control" placeholder="Área" name="area" id="area">
 						</div>
 						<div class="form-group"><button type="submit" class="btn btn-success">Agregar</button></div>
 					</fieldset>
