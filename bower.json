@@ -21,6 +21,7 @@
     "bootstrap": "~3.3.5",
     "bootbox": "~4.4.0",
     "jquery": "~2.1.4",
-    "Sortable": "~1.2.0"
+    "Sortable": "~1.2.0",
+    "jquery.tablesorter": "~2.22.3"
   }
 }
