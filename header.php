@@ -23,10 +23,13 @@
             }
         </style>
         <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="css/main.css">
+        <!--<link rel="stylesheet" href="css/main.css">-->
 
     </head>
     <body>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="functions.js"></script>
+        <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -65,5 +68,5 @@
       </div>
     </div>
     -->
-    <div class="container">
+    <div class="container-fluid">
     <!-- End Header-->
