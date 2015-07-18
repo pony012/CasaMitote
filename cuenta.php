@@ -94,7 +94,12 @@
 		<div class="col-xs-6">
 			<div id="listasContainer">
 				<div class="listas-secundarias col-xs-12 hide" id="mainList" data-active="0">
-					<h4 class="tituloCuenta"></h4>
+					<h4 class="tituloCuenta" style="display: inline"></h4>
+					<div class="radio-inline">
+						<label>
+							<input type="radio" name="cuentaActivaRadio"> Activa
+						</label>
+					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 					</ul>
 					<div class="total-cuenta row">
@@ -218,6 +223,7 @@
 				sort: false
 			});
 		});
+		
 		var crearLista = function(lista, grupo){
 			Sortable.create(lista, { 
 				group: {
@@ -225,12 +231,6 @@
 					put: ["Grupo1", grupo]
 				},
 				sort: false,
-				onEnd: function (/**Event*/evt) {
-					var itemEl = evt.item;	// dragged HTMLElement
-					var newList = $(itemEl).parent();
-					evt.from;	// previous list
-					
-				},
 				onAdd: function(evt){
 					var itemEl = evt.item;	// dragged HTMLElement
 					var jEl = $(itemEl);
@@ -250,7 +250,8 @@
 				 	var ul = $(itemEl).parent();
 				 	ul.find($(itemEl)).remove();
 				 	ul.append(itemEl);
-				 	
+				 	ul.parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
+
 				 	totalContainer = ul.parent().find(".total-cuenta");
 				 	subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) + parseInt(jEl.find('.precio').html());
 				 	
@@ -262,7 +263,10 @@
 
 				 	jEl.find(".botones").removeClass("hide");
 				 	jEl.find('.btn-eliminar').on('click touchend', function(){
+				 		jEl.parent().parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
+
 				 		jEl.remove();
+				 		
 				 		var subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) - parseInt(jEl.find('.precio').html());
 				 	
 					 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
@@ -272,7 +276,6 @@
 					 	totalContainer.find(".total").html(subTotal);
 				 	});
 				},
-
 				scroll: true
 			 });
 		}
@@ -308,20 +311,25 @@
 				var otherList = $("#mainList").clone();
 				otherList.removeAttr("id");
 				otherList.find(".tituloCuenta").html(nombre);
-				otherList.attr("data-active","1");
 				otherList.removeClass("hide");
 				$("#mainList").parent().append(otherList);
+				otherList.find("[name=cuentaActivaRadio]").prop("checked", true).change();
 				crearLista(otherList.find(".simpleList")[0], nombre);
 			}
 			$(this).parent().modal('hide');
 		});
 		$('#modalNuevaCuenta').on('shown.bs.modal', function () {
 		    $("#nombreNuevaCuenta").focus();
-		})
+		});
 		$('#modalNuevaCuenta').on('hidden.bs.modal', function () {
 		    $("#nombreNuevaCuenta").val('');
-		})
-		
+		});
+
+		$(document).on("change", "[name=cuentaActivaRadio]", function(){
+			$("[data-active=1]").attr("data-active", "0");
+			$(this).parent().parent().parent().attr("data-active", "1");
+
+		});
 	</script>
 <?php
 	include_once 'footer.php';
