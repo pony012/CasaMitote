@@ -37,7 +37,7 @@
 <?php
 	$baseMdl = new BaseMdl();
 
-	$stmt = $baseMdl->driver->prepare("SELECT nombre, idTipoProducto FROM TiposProductos");
+	$stmt = $baseMdl->driver->prepare("SELECT * FROM TiposProductos");
 	
 	if (!$stmt->execute()) {
 	}else{
@@ -68,7 +68,7 @@
 						while($row2 = $result2->fetch_array(MYSQLI_ASSOC)){
 ?>
 								<li class="list-group-item">
-									<div class="row" data-id="<?php echo $row2['idProducto']?>">
+									<div class="row" data-id="<?php echo $row2['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0">
 										<div class="col-xs-6 nombre"><?php echo $row2['nombre']?></div>
 										<div class="col-xs-3 precio"><?php echo $row2['precio']?></div>
 										<div class="col-xs-3 botones hide"><button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button></div>
@@ -121,15 +121,22 @@
 				</div>
 			</div>
 			<div>
-				<div class="text-center col-xs-4">
-					<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
+				<div class="row" style="margin-bottom: 15px;">
+					<div class="text-center col-xs-4">
+						<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
+					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
+					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
+					</div>
 				</div>
-				<div class="text-center col-xs-4">
-					<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
-				</div>
-				<div class="text-center col-xs-4">
-					<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
-				</div>
+				<div class="row" style="margin-bottom: 15px;">
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success pedirComanda">Pedir Comanda</button>
+					</div>	
+				</div>		
 			</div>
 		</div>
 	</div>
@@ -283,7 +290,9 @@
 				 	totalContainer.find(".total").attr('data-total', subTotal);
 				 	totalContainer.find(".total").html(subTotal);
 
-				 	jEl.find(".botones").removeClass("hide");
+				 	if(jEl.children().attr("data-pedido")==0){
+				 		jEl.find(".botones").removeClass("hide");
+				 	}
 				 	jEl.find('.btn-eliminar').on('click touchend', function(){
 				 		jEl.parent().parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
 
@@ -330,7 +339,7 @@
 
 		$(".dividirCuenta").on("click touchend",function(){
 			var lista = $("[data-active=1]");
-			if(lista.length){
+			if(lista.length != 0){
 				lista.attr("data-iter",parseInt(lista.attr("data-iter"))+1);
 				var nombre = lista.attr("data-nombre")+'-'+lista.attr("data-iter");
 				var grupo = lista.attr("data-grupo");
@@ -354,6 +363,27 @@
 				$("#monto").val('');
 				$("#monto2").val('');
 				tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
+			}
+		});
+
+		$(".pedirComanda").on('click touchend', function(){
+			var ulActivo = $("#listasContainer>[data-active=1]>ul");
+			if(ulActivo.length!=0){
+				/*
+				* TODO
+				*	Enviar petición ajax para pedir la comanda
+				*/
+				$.each(ulActivo.find("li"), function(k,v){
+					var producto = $(v).children();
+					var productos = [];
+					if(producto.attr("data-pedido")==0){
+						$(v).find(".botones").addClass("hide");
+						producto.attr("data-pedido", 1);
+						productos.push(producto);
+					}
+					//tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
+				});
+				//tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
 			}
 		});
 
