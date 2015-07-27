@@ -68,7 +68,7 @@
 						while($row2 = $result2->fetch_array(MYSQLI_ASSOC)){
 ?>
 								<li class="list-group-item">
-									<div class="row">
+									<div class="row" data-id="<?php echo $row2['idProducto']?>">
 										<div class="col-xs-6 nombre"><?php echo $row2['nombre']?></div>
 										<div class="col-xs-3 precio"><?php echo $row2['precio']?></div>
 										<div class="col-xs-3 botones hide"><button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button></div>
@@ -88,6 +88,11 @@
 		}
 	}
 ?>
+			</div>
+			<div class="row">
+				<div class="col-xs-12 mesasActivasContainer">
+					
+				</div>
 			</div>
 		</div>
 
@@ -120,10 +125,10 @@
 					<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
 				</div>
 				<div class="text-center col-xs-4">
-					<button class="btn btn-primary dividircuenta" >Dividir Cuenta</button>
+					<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
 				</div>
 				<div class="text-center col-xs-4">
-					<button class="btn btn-success cobrarCuenta" data-toggle="modal" data-target=".bs-example-modal-sm">Cobrar Cuenta</button>
+					<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
 				</div>
 			</div>
 		</div>
@@ -159,22 +164,39 @@
 						</table>
 						<div class="row">
 							<div class="col-xs-12">
-								<div class="form-group">
-									<label class="radio-inline">
-									  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> Efectivo
-									</label>
-									<label class="radio-inline">
-									  <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> Tarjeta
-									</label>
+								<div class="col-xs-6">
+									<div class="form-group">
+										<label class="radio-inline">
+										  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> Efectivo
+										</label>
+										<label class="radio-inline">
+										  <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> Tarjeta
+										</label>
+									</div>
+									<div class="form-group">
+										<label for="monto">Monto</label>
+										<input name="monto" id="monto" type="number" placeholder="Monto" class="form-control">
+									</div>
 								</div>
-
-								<div class="form-group col-xs-6">
-									<label for="monto">Monto</label>
-									<input name="monto" id="monto" type="number" placeholder="Monto" class="form-control">
-								</div>
-								<div class="form-group">
-									<h3>Sobra:</h3>
-									<b id="sobra">0</b>
+								<div class="col-xs-6">
+									<div class="form-group">
+										<label class="radio-inline">
+										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio3" value="option3"> Efectivo
+										</label>
+										<label class="radio-inline">
+										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio4" value="option4"> Tarjeta
+										</label>
+									</div>
+									<div class="form-group">
+										<label for="monto2">Monto</label>
+										<input name="monto2" id="monto2" type="number" placeholder="Monto" class="form-control">
+									</div>
+								</div>	
+								<div class="col-xs-12">
+									<div class="form-group">
+										<h3>Sobra:</h3>
+										<b id="sobra">0</b>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -280,20 +302,67 @@
 			 });
 		}
 		
+		var clonarLista = function(nombre, grupo){
+			if(nombre.length != 0){
+				var otherList = $("#mainList").clone();
+				otherList.attr("data-nombre", nombre);
+				otherList.attr("data-grupo", grupo);
+				otherList.attr("data-iter", 0);
+				otherList.removeAttr("id");
+				otherList.find(".tituloCuenta").html(nombre);
+				otherList.removeClass("hide");
+				otherList.find("[name=cuentaActivaRadio]").prop("checked", true).change();
+				$("[data-active=1]").attr("data-active",0);
+				otherList.attr("data-active", "1");
+				crearLista(otherList.find(".simpleList")[0], grupo);
+				$(".mesasActivasContainer").append($('<button type="button" class="btn btn-primary btn-lg" style="margin: 5px;" data-nombre-boton="'+nombre+'">'+nombre+'</button>'));
+				return otherList;
+			}
+		}
+
+		$("#crearCuenta").submit(function(e){
+			e.preventDefault();
+			var nombre = $("#nombreNuevaCuenta").val();
+			var otherList = clonarLista(nombre, nombre);
+			$("#mainList").parent().append(otherList);
+			$(this).parent().modal('hide');
+		});
+
+		$(".dividirCuenta").on("click touchend",function(){
+			var lista = $("[data-active=1]");
+			if(lista.length){
+				lista.attr("data-iter",parseInt(lista.attr("data-iter"))+1);
+				var nombre = lista.attr("data-nombre")+'-'+lista.attr("data-iter");
+				var grupo = lista.attr("data-grupo");
+				var otherList = clonarLista(nombre, grupo);
+				lista.after(otherList);
+			}
+		});
+
 		$(".cobrarCuenta").on('click touchend', function(){
 			var tabla = $("#tabla-cuenta");
 			tabla.empty();
 			var ulActivo = $("#listasContainer>[data-active=1]>ul");
-			$.each(ulActivo.find("li"), function(k,v){
-				tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
-			});
-			tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
-			tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
+			if(ulActivo.length!=0){
+				$(".bs-example-modal-sm").modal("show");
+				$.each(ulActivo.find("li"), function(k,v){
+					tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
+				});
+				tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
+				$("#sobra").html(-ulActivo.parent().find(".total").html());
+				$("#sobra").addClass('text-danger');
+				$("#monto").val('');
+				$("#monto2").val('');
+				tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
+			}
 		});
 
-		$("#monto").on('input',function(){
-			var totalCuenta = parseInt($(this).parent().parent().parent().parent().find(".total").html());
-			var sobra = -(totalCuenta-parseInt($(this).val()));
+		$("#monto, #monto2").on('input',function(){
+			var totalCuenta = parseInt($(this).parent().parent().parent().parent().parent().find(".total").html());
+			var monto1 = $("#monto").val() || 0,
+				monto2 = $("#monto2").val() || 0;
+
+			var sobra = -(totalCuenta-parseInt(monto1)-parseInt(monto2));
 
 			$("#sobra").html(sobra);
 
@@ -304,20 +373,6 @@
 			}
 		});
 
-		$("#crearCuenta").submit(function(e){
-			e.preventDefault();
-			var nombre = $("#nombreNuevaCuenta").val();
-			if(nombre.length != 0){
-				var otherList = $("#mainList").clone();
-				otherList.removeAttr("id");
-				otherList.find(".tituloCuenta").html(nombre);
-				otherList.removeClass("hide");
-				$("#mainList").parent().append(otherList);
-				otherList.find("[name=cuentaActivaRadio]").prop("checked", true).change();
-				crearLista(otherList.find(".simpleList")[0], nombre);
-			}
-			$(this).parent().modal('hide');
-		});
 		$('#modalNuevaCuenta').on('shown.bs.modal', function () {
 		    $("#nombreNuevaCuenta").focus();
 		});
@@ -328,7 +383,24 @@
 		$(document).on("change", "[name=cuentaActivaRadio]", function(){
 			$("[data-active=1]").attr("data-active", "0");
 			$(this).parent().parent().parent().attr("data-active", "1");
+		});
 
+		$(document).on("click touchend", ".mesasActivasContainer > button", function(){
+			var nombre = $(this).html();
+			lista = $("[data-nombre="+nombre);
+			$(this).toggleClass("disabled");
+			if(lista.attr("data-active")=="1"){
+				lista.attr("data-active",0);
+				lista.find("[name=cuentaActivaRadio]").prop("checked", false);
+				if(lista.nextAll(":not(.hide)").length){
+					$(lista.nextAll(":not(.hide)")[0]).find("[name=cuentaActivaRadio]").prop("checked", true).change();
+				}else if(lista.prevAll(":not(.hide)").length){
+					$(lista.prevAll(":not(.hide)")[0]).find("[name=cuentaActivaRadio]").prop("checked", true).change();
+				}
+			}else if(lista.hasClass("hide")){
+				lista.find("[name=cuentaActivaRadio]").prop("checked", true).change();
+			}
+			lista.toggleClass("hide");
 		});
 	</script>
 <?php
