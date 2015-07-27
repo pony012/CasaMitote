@@ -6,10 +6,11 @@
 
 	$returnObj = array();
 
-	$nombre 	= $baseMdl->driver->real_escape_string($_POST['nombre']);
-	$comentario = $baseMdl->driver->real_escape_string($_POST['comentario']);
-	$precio 	= is_numeric($_POST['precio'])?$_POST['precio']:die(json_encode(array('error'=>array('code'=>1,'description'=>'Error en precio'))));
-	$categoria 	= is_numeric($_POST['categoria'])?$_POST['categoria']:die(json_encode(array('error'=>array('code'=>2,'description'=>'Error en categoria'))));
+	$id 		= is_numeric($_POST['idModal'])?$_POST['idModal']:die(json_encode(array('error'=>array('code'=>3,'description'=>'Error en id de producto'))));
+	$nombre 	= $baseMdl->driver->real_escape_string($_POST['nombreModal']);
+	$comentario = $baseMdl->driver->real_escape_string(str_replace(array("\r\n", "\r", "\n"), "<br />", $_POST['comentarioModal']));
+	$precio 	= is_numeric($_POST['precioModal'])?$_POST['precioModal']:die(json_encode(array('error'=>array('code'=>1,'description'=>'Error en precio'))));
+	$categoria 	= is_numeric($_POST['categoriaModal'])?$_POST['categoriaModal']:die(json_encode(array('error'=>array('code'=>2,'description'=>'Error en categoria'))));
 
 	$stmt = $baseMdl->driver->prepare("SELECT nombre FROM TiposProductos WHERE idTipoProducto = ?");
 			
@@ -27,8 +28,13 @@
 		}
 	}
 
-	$stmt = $baseMdl->driver->prepare("INSERT INTO Productos(idTipoProducto, nombre, comentario, precio) VALUES(?,?,?,?)");
-	if(!$stmt->bind_param('issd',$categoria, $nombre, $comentario, $precio)){
+	$stmt = $baseMdl->driver->prepare("UPDATE Productos SET 
+										idTipoProducto = ?, 
+										nombre = ?, 
+										comentario = ?, 
+										precio = ? 
+										WHERE idProducto = ?");
+	if(!$stmt->bind_param('issdi',$categoria, $nombre, $comentario, $precio, $id)){
 		//No se pudo bindear el nombre, error en la base de datos
 	}else if (!$stmt->execute()) {
 		//No se pudo ejecutar, error en la base de datos
@@ -37,7 +43,7 @@
 									'description' 	=> $stmt->error
 									);
 	}else{
-		$returnObj['id'] = $stmt->insert_id;
+		$returnObj['id'] = $id;
 		$returnObj['categoria'] = $nombreCategoria;
 		$returnObj['idCategoria'] = $categoria;
 		$returnObj['comentario'] = $comentario;
