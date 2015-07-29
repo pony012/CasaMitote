@@ -7,7 +7,7 @@
 	$returnObj = array();
 
 	$nombre 	= $baseMdl->driver->real_escape_string($_POST['nombre']);
-	$comentario = $baseMdl->driver->real_escape_string($_POST['comentario']);
+	$comentario = $baseMdl->driver->real_escape_string(str_replace(array("\r\n", "\r", "\n"), "<br />", $_POST['comentario']));
 	$precio 	= is_numeric($_POST['precio'])?$_POST['precio']:die(json_encode(array('error'=>array('code'=>1,'description'=>'Error en precio'))));
 	$categoria 	= is_numeric($_POST['categoria'])?$_POST['categoria']:die(json_encode(array('error'=>array('code'=>2,'description'=>'Error en categoria'))));
 
