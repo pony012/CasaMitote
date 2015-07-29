@@ -68,10 +68,13 @@
 						while($row2 = $result2->fetch_array(MYSQLI_ASSOC)){
 ?>
 								<li class="list-group-item">
-									<div class="row" data-id="<?php echo $row2['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0">
+									<div class="row" data-id="<?php echo $row2['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="">
 										<div class="col-xs-6 nombre"><?php echo $row2['nombre']?></div>
 										<div class="col-xs-3 precio"><?php echo $row2['precio']?></div>
-										<div class="col-xs-3 botones hide"><button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button></div>
+										<div class="col-xs-3 botones hide">
+											<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
+											<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
+										</div>
 									</div>
 								</li>
 <?php
@@ -105,6 +108,10 @@
 							<input type="radio" name="cuentaActivaRadio"> Activa
 						</label>
 					</div>
+					<div class="botones" style="display: inline; margin-left:15px;">
+						<button class="btn btn-xs btn-info btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
+						<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
+					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 					</ul>
 					<div class="total-cuenta row">
@@ -121,6 +128,9 @@
 				</div>
 			</div>
 			<div>
+<?php
+	if(isset($_SESSION['user'])){
+?>
 				<div class="row" style="margin-bottom: 15px;">
 					<div class="text-center col-xs-4">
 						<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
@@ -136,7 +146,10 @@
 					<div class="text-center col-xs-4">
 						<button class="btn btn-success pedirComanda">Pedir Comanda</button>
 					</div>	
-				</div>		
+				</div>
+<?php
+	}
+?>
 			</div>
 		</div>
 	</div>
@@ -230,6 +243,7 @@
 						<div class="form-group">
 							<input type="text" class="form-control" placeholder="Nombre de la cuenta" id="nombreNuevaCuenta">
 						</div>
+						<div class="alert alert-warning hide" id="alertNuevaCuenta" role="alert">Ese nombre ya existe :(</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
@@ -240,8 +254,32 @@
 			</div>
 		</form>
 	</div>
-
+	
+	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelComentario" id="modalComentario">
+		<form action="" id="ingresarComentario">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="labelComentario"></h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<textarea class="form-control" name="comentario" id="comentario" placeholder="Comentario..."></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="submit" class="btn btn-success">Aplicar Comentario</butoton>
+					</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
 	<script>
+		var comentando = null;
+
 		$.each($('.src-list'), function(k,v){
 			Sortable.create(v, {
 				group: {
@@ -332,9 +370,15 @@
 		$("#crearCuenta").submit(function(e){
 			e.preventDefault();
 			var nombre = $("#nombreNuevaCuenta").val();
-			var otherList = clonarLista(nombre, nombre);
-			$("#mainList").parent().append(otherList);
-			$(this).parent().modal('hide');
+			
+			if(nombre && $("[data-nombre="+nombre+"]").length == 0 ){
+				var otherList = clonarLista(nombre, nombre);
+				$("#mainList").parent().append(otherList);
+				$("#alertNuevaCuenta").addClass("hide")
+				$(this).parent().modal('hide');
+			}else{
+				$("#alertNuevaCuenta").removeClass("hide")
+			}
 		});
 
 		$(".dividirCuenta").on("click touchend",function(){
@@ -367,22 +411,54 @@
 		});
 
 		$(".pedirComanda").on('click touchend', function(){
-			var ulActivo = $("#listasContainer>[data-active=1]>ul");
+			var ulActivo 		= $("#listasContainer>[data-active=1]>ul");
+			var parent 			= ulActivo.parent();
+			var nombreCuenta 	= parent.attr("data-nombre"),
+				grupo 			= parent.attr("data-grupo");
+				comentario 		= parent.attr("data-comentario");
+				id				= parent.attr("data-id");
 			if(ulActivo.length!=0){
 				/*
 				* TODO
 				*	Enviar petición ajax para pedir la comanda
 				*/
+
+				var cuenta = {
+								nombre		: parent.attr("data-nombre"),
+								grupo		: parent.attr("data-grupo"),
+								comentario	: parent.attr("data-comentario"),
+								id			: parent.attr("data-id"),
+								productos	:[],
+							};
 				$.each(ulActivo.find("li"), function(k,v){
 					var producto = $(v).children();
-					var productos = [];
 					if(producto.attr("data-pedido")==0){
 						$(v).find(".botones").addClass("hide");
 						producto.attr("data-pedido", 1);
-						productos.push(producto);
+						cuenta.productos.push({
+							id: producto.attr("data-id"),
+							comentario: producto.attr("data-comentario"),
+							area: producto.attr("data-area")
+						});
 					}
 					//tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
 				});
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "pedirComanda.php",
+					data: {
+						'cuenta':cuenta
+					},
+					//contentType: "application/json; charset=utf-8",
+					success: function(data){
+					    console.log("Added");
+					},
+					error: function(e){
+					    console.log(e.message);
+					}
+				});
+				console.log(cuenta);
 				//tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
 			}
 		});
@@ -410,6 +486,14 @@
 		    $("#nombreNuevaCuenta").val('');
 		});
 
+		$('#modalComentario').on('shown.bs.modal', function () {
+		    $("#comentario").focus();
+		});
+		$('#modalComentario').on('hidden.bs.modal', function () {
+		    $("#comentario").val('');
+		    comentando = null;
+		});
+
 		$(document).on("change", "[name=cuentaActivaRadio]", function(){
 			$("[data-active=1]").attr("data-active", "0");
 			$(this).parent().parent().parent().attr("data-active", "1");
@@ -431,6 +515,34 @@
 				lista.find("[name=cuentaActivaRadio]").prop("checked", true).change();
 			}
 			lista.toggleClass("hide");
+		});
+
+		$(document).on("click touchend", ".btn-comentario", function(){
+			var element = $(this);
+			comentando = element;
+			if(element.attr("data-cuenta") == 1){
+				var nombreCuenta = element.parent().parent().find('.tituloCuenta').html();
+				$("#labelComentario").html(nombreCuenta);
+			}else{
+				var nombreProducto = element.parent().parent().find('.nombre').html();
+				var nombreCuenta = element.closest('[data-nombre]').attr("data-nombre");
+				$("#labelComentario").html(nombreCuenta +" | "+ nombreProducto);
+			}
+			$("#comentario").val(element.parent().parent().attr("data-comentario"));
+		});
+
+		$("#ingresarComentario").submit(function(e){
+			e.preventDefault();
+			comentando.parent().parent().attr("data-comentario", $("#comentario").val());
+			if($("#comentario").val().length > 0){
+				comentando.removeClass("btn-info");
+				comentando.addClass("btn-success");
+			}else{
+				comentando.addClass("btn-info");
+				comentando.removeClass("btn-success");
+			}
+			$(this).parent().modal('hide');
+			
 		});
 	</script>
 <?php
