@@ -1,5 +1,6 @@
 <?php
     include_once 'functions.php';
+    session_start();
 ?>
 <!doctype html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
@@ -45,15 +46,29 @@
           <a class="navbar-brand" href="#">Casa Mitote</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right" role="form">
-            <div class="form-group">
-              <input type="text" placeholder="Email" class="form-control">
-            </div>
-            <div class="form-group">
-              <input type="password" placeholder="Password" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-success">Sign in</button>
-          </form>
+<?php
+    if(isset($_SESSION['user'])){
+?>
+            <form class="navbar-form navbar-right" role="form" action="signout.php" method="POST">
+                <label class="label label-primary"><?php echo $_SESSION['nombre']?> | <?php echo $_SESSION['user']?></label>
+                <button type="submit" class="btn btn-success">Salir</button>
+            </form>
+<?php
+    }else{
+?>
+            <form class="navbar-form navbar-right" role="form" action="signin.php" method="POST">
+                <div class="form-group">
+                  <input type="text" placeholder="Nombre" class="form-control" name="user">
+                </div>
+                <div class="form-group">
+                  <input type="password" placeholder="Password" class="form-control" name="pass">
+                </div>
+                <button type="submit" class="btn btn-success">Entrar</button>
+            </form>
+<?php
+    }
+?>
+          
         </div><!--/.navbar-collapse -->
       </div>
     </nav>
