@@ -46,6 +46,19 @@
 		protected $session;
 		
 		/**
+		*	Verifica si hay una sesion activa
+		*/
+		public static function isLoged(){
+			return isset($_SESSION['user']);
+		}
+
+		/**
+		*	Retorna el id del cargo que está logueado
+		*/
+		public static function getType(){
+			return $_SESSION['type'];
+		}
+		/**
 		*	Inicia una sesion y retorna true si se inició, false si ya existía una activa
 		*	En caso de que el usuario esté en la base de datos, se guardará en la sesión el nombre del usuario
 		*	y su tipo.
@@ -63,10 +76,10 @@
 
 			$userMdl = new BaseMdl();
 
-			$_user	= $userMdl;
+			$_user	= is_numeric($user)?$user:NULL;
 			$_pass	= $userMdl->driver->real_escape_string($pass);
 
-			$stmt = $userMdl->driver->prepare("SELECT * FROM Usuario WHERE idUsuario = ?");
+			$stmt = $userMdl->driver->prepare("SELECT * FROM Usuario WHERE idUsuario = ? AND activo = 1");
 			if(!$stmt->bind_param('i',$_user)){
 				//No se pudo bindear el nombre, error en la base de datos
 			}else if (!$stmt->execute()) {
@@ -76,12 +89,13 @@
 				if($result->field_count > 0){
 					$result = $result->fetch_array();
 					if(strcmp($result['password'],$pass)==0){
+						session_start();
 						//md5(md5("1234")."astrum1234".md5("astr"))
 						//b956f5207a5f0bfa514292171f1c285f
 						$_SESSION['user'] = $user;
+						$_SESSION['nombre'] = $result['nombres'];
 						//$_SESSION['pass'] = $pass;
-						$_SESSION['type'] = $result['IDCargo'];
-						$_SESSION['IDEmpleado'] = $result['IDEmpleado'];
+						$_SESSION['type'] = $result['idTipoDeCuenta'];
 						return true;
 					}else{
 						//Cargar vista de fallo de contraseña
