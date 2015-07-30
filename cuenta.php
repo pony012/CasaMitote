@@ -65,12 +65,12 @@
 				}else{
 					$result2 = $stmt2->get_result();
 					if($result2->field_count > 0){
-						while($row2 = $result2->fetch_array(MYSQLI_ASSOC)){
+						while($producto = $result2->fetch_array(MYSQLI_ASSOC)){
 ?>
 								<li class="list-group-item">
-									<div class="row" data-id="<?php echo $row2['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="">
-										<div class="col-xs-6 nombre"><?php echo $row2['nombre']?></div>
-										<div class="col-xs-3 precio"><?php echo $row2['precio']?></div>
+									<div class="row" data-id="<?php echo $producto['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="">
+										<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
+										<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
 										<div class="col-xs-3 botones hide">
 											<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
 											<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
@@ -100,7 +100,99 @@
 		</div>
 
 		<div class="col-xs-6">
+<?php
+	if(isset($_SESSION['user'])){
+?>
 			<div id="listasContainer">
+<?php 
+		$cuentaMdl = new BaseMdl();
+
+		$cuentaSeleccionada = isset($_GET['cuenta'])?$_GET['cuenta']:NULL;
+		$seleccionadas		= isset($_GET['ids'])?explode(',', $_GET['ids']):array();
+
+		$stmt = $cuentaMdl->driver->prepare("SELECT * FROM Cuentas WHERE pagada = 0 AND activa = 1");
+		
+		if (!$stmt->execute()) {
+		}else{
+			$result = $stmt->get_result();
+			if($result->field_count > 0){
+				$i = 0;
+				while($cuenta = $result->fetch_array(MYSQLI_ASSOC)){
+					$total = 0;
+?>
+				<div class="listas-secundarias col-xs-12"
+						data-seleccionada="<?php echo in_array($cuenta['idCuenta'], $seleccionadas)?1:0; ?>"
+						data-active="<?php echo $cuentaSeleccionada==$cuenta['idCuenta']?1:0;?>"
+						data-nombre="<?php echo $cuenta['nombre'];?>" 
+						data-grupo="<?php echo $cuenta['grupo'];?>"
+						data-iter="0"
+						data-comentario="<?php echo $cuenta['comentario'];?>"
+						data-id="<?php echo $cuenta['idCuenta'];?>">
+					<h4 class="tituloCuenta" style="display: inline"><?php echo $cuenta['nombre'];?></h4>
+					<div class="radio-inline">
+						<label>
+							<input type="radio" name="cuentaActivaRadio" <?php if($cuentaSeleccionada==$cuenta['idCuenta']){echo 'checked="checked"';}?>> Activa
+						</label>
+					</div>
+					<div class="botones" style="display: inline; margin-left:15px;">
+						<button class="btn btn-xs <?php echo strlen($cuenta['comentario'])>0?'btn-success':'btn-info';?> btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
+						<button class="btn btn-xs btn-danger btn-eliminar hide"><span class="glyphicon glyphicon-remove"></span></button>
+					</div>
+					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
+<?php 
+					$baseMdl2 = new BaseMdl();
+
+					$stmt2 = $baseMdl2->driver->prepare("SELECT P.idProducto, P.nombre, PC.comentario, P.precio, TP.area
+															FROM ProductosCuenta AS PC
+															LEFT JOIN Productos AS P ON P.idProducto = PC.idProducto
+															LEFT JOIN TiposProductos AS TP ON TP.idTipoProducto = P.idTipoProducto
+															WHERE idCuenta = {$cuenta['idCuenta']}");
+					
+					if (!$stmt2->execute()) {
+					}else{
+						$result2 = $stmt2->get_result();
+						if($result2->field_count > 0){
+							while($producto = $result2->fetch_array(MYSQLI_ASSOC)){
+								$total += $producto['precio'];
+?>
+						<li class="list-group-item" draggable="false">
+							<div class="row" 
+									data-id="<?php echo $producto['idProducto']?>" 
+									data-area="<?php echo $producto['area']?>" 
+									data-pedido="1" 
+									data-comentario="<?php echo $producto['comentario'];?>">
+								<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
+								<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
+								<div class="col-xs-3 botones hide">
+									<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
+									<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
+								</div>
+							</div>
+						</li>
+<?php
+							}
+						}
+					}
+					$stmt2->close();
+?>
+					</ul>
+					<div class="total-cuenta row">
+						<div class="col-xs-6">
+							<b>Total:</b>
+						</div>
+						<div class="col-xs-3">
+							<p class="sub-total" data-subtotal="<?php echo $total;?>"><?php echo $total;?></p>
+						</div>
+						<div class="col-xs-3">
+							<p class="total" data-total="<?php echo $total;?>"><?php echo $total;?></p>
+						</div>
+					</div>
+				</div>				
+<?php
+				}
+			}
+		}
+?>
 				<div class="listas-secundarias col-xs-12 hide" id="mainList" data-active="0">
 					<h4 class="tituloCuenta" style="display: inline"></h4>
 					<div class="radio-inline">
@@ -110,7 +202,7 @@
 					</div>
 					<div class="botones" style="display: inline; margin-left:15px;">
 						<button class="btn btn-xs btn-info btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
-						<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
+						<button class="btn btn-xs btn-danger btn-eliminar-cuenta"><span class="glyphicon glyphicon-remove"></span></button>
 					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 					</ul>
@@ -128,9 +220,6 @@
 				</div>
 			</div>
 			<div>
-<?php
-	if(isset($_SESSION['user'])){
-?>
 				<div class="row" style="margin-bottom: 15px;">
 					<div class="text-center col-xs-4">
 						<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
@@ -147,10 +236,10 @@
 						<button class="btn btn-success pedirComanda">Pedir Comanda</button>
 					</div>	
 				</div>
+			</div>
 <?php
 	}
 ?>
-			</div>
 		</div>
 	</div>
 
@@ -277,271 +366,7 @@
 			</div>
 		</form>
 	</div>
-	<script>
-		var comentando = null;
-
-		$.each($('.src-list'), function(k,v){
-			Sortable.create(v, {
-				group: {
-					name: "Grupo1", 
-					pull: 'clone', 
-					put: false
-				},
-				sort: false
-			});
-		});
-		
-		var crearLista = function(lista, grupo){
-			Sortable.create(lista, { 
-				group: {
-					name: grupo,
-					put: ["Grupo1", grupo]
-				},
-				sort: false,
-				onAdd: function(evt){
-					var itemEl = evt.item;	// dragged HTMLElement
-					var jEl = $(itemEl);
-					var subTotal = 0;
-					var totalContainer = null;
-					if($(evt.from).hasClass("simpleList")){
-						totalContainer = $(evt.from).parent().find(".total-cuenta");
-					 	subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) - parseInt(jEl.find('.precio').html());
-					 	
-					 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
-					 	totalContainer.find(".sub-total").html(subTotal);
-
-					 	totalContainer.find(".total").attr('data-total', subTotal);
-					 	totalContainer.find(".total").html(subTotal);
-					}
-
-				 	var ul = $(itemEl).parent();
-				 	ul.find($(itemEl)).remove();
-				 	ul.append(itemEl);
-				 	ul.parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
-
-				 	totalContainer = ul.parent().find(".total-cuenta");
-				 	subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) + parseInt(jEl.find('.precio').html());
-				 	
-				 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
-				 	totalContainer.find(".sub-total").html(subTotal);
-
-				 	totalContainer.find(".total").attr('data-total', subTotal);
-				 	totalContainer.find(".total").html(subTotal);
-
-				 	if(jEl.children().attr("data-pedido")==0){
-				 		jEl.find(".botones").removeClass("hide");
-				 	}
-				 	jEl.find('.btn-eliminar').on('click touchend', function(){
-				 		jEl.parent().parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
-
-				 		jEl.remove();
-				 		
-				 		var subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) - parseInt(jEl.find('.precio').html());
-				 	
-					 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
-					 	totalContainer.find(".sub-total").html(subTotal);
-
-					 	totalContainer.find(".total").attr('data-total', subTotal);
-					 	totalContainer.find(".total").html(subTotal);
-				 	});
-				},
-				scroll: true
-			 });
-		}
-		
-		var clonarLista = function(nombre, grupo){
-			if(nombre.length != 0){
-				var otherList = $("#mainList").clone();
-				otherList.attr("data-nombre", nombre);
-				otherList.attr("data-grupo", grupo);
-				otherList.attr("data-iter", 0);
-				otherList.removeAttr("id");
-				otherList.find(".tituloCuenta").html(nombre);
-				otherList.removeClass("hide");
-				otherList.find("[name=cuentaActivaRadio]").prop("checked", true).change();
-				$("[data-active=1]").attr("data-active",0);
-				otherList.attr("data-active", "1");
-				crearLista(otherList.find(".simpleList")[0], grupo);
-				$(".mesasActivasContainer").append($('<button type="button" class="btn btn-primary btn-lg" style="margin: 5px;" data-nombre-boton="'+nombre+'">'+nombre+'</button>'));
-				return otherList;
-			}
-		}
-
-		$("#crearCuenta").submit(function(e){
-			e.preventDefault();
-			var nombre = $("#nombreNuevaCuenta").val();
-			
-			if(nombre && $("[data-nombre="+nombre+"]").length == 0 ){
-				var otherList = clonarLista(nombre, nombre);
-				$("#mainList").parent().append(otherList);
-				$("#alertNuevaCuenta").addClass("hide")
-				$(this).parent().modal('hide');
-			}else{
-				$("#alertNuevaCuenta").removeClass("hide")
-			}
-		});
-
-		$(".dividirCuenta").on("click touchend",function(){
-			var lista = $("[data-active=1]");
-			if(lista.length != 0){
-				lista.attr("data-iter",parseInt(lista.attr("data-iter"))+1);
-				var nombre = lista.attr("data-nombre")+'-'+lista.attr("data-iter");
-				var grupo = lista.attr("data-grupo");
-				var otherList = clonarLista(nombre, grupo);
-				lista.after(otherList);
-			}
-		});
-
-		$(".cobrarCuenta").on('click touchend', function(){
-			var tabla = $("#tabla-cuenta");
-			tabla.empty();
-			var ulActivo = $("#listasContainer>[data-active=1]>ul");
-			if(ulActivo.length!=0){
-				$(".bs-example-modal-sm").modal("show");
-				$.each(ulActivo.find("li"), function(k,v){
-					tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
-				});
-				tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
-				$("#sobra").html(-ulActivo.parent().find(".total").html());
-				$("#sobra").addClass('text-danger');
-				$("#monto").val('');
-				$("#monto2").val('');
-				tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
-			}
-		});
-
-		$(".pedirComanda").on('click touchend', function(){
-			var ulActivo 		= $("#listasContainer>[data-active=1]>ul");
-			var parent 			= ulActivo.parent();
-			var nombreCuenta 	= parent.attr("data-nombre"),
-				grupo 			= parent.attr("data-grupo");
-				comentario 		= parent.attr("data-comentario");
-				id				= parent.attr("data-id");
-			if(ulActivo.length!=0){
-				var cuenta = {
-								nombre		: parent.attr("data-nombre"),
-								grupo		: parent.attr("data-grupo"),
-								comentario	: parent.attr("data-comentario"),
-								id			: parent.attr("data-id"),
-								productos	:[],
-							};
-				$.each(ulActivo.find("li"), function(k,v){
-					var producto = $(v).children();
-					if(producto.attr("data-pedido")==0){
-						$(v).find(".botones").addClass("hide");
-						producto.attr("data-pedido", 1);
-						cuenta.productos.push({
-							id: producto.attr("data-id"),
-							comentario: producto.attr("data-comentario"),
-							area: producto.attr("data-area")
-						});
-					}
-				});
-				if(cuenta.productos.length != 0){
-					//console.log(cuenta);
-					$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "pedirComanda.php",
-						data: {
-							'cuenta':cuenta
-						},
-						success: function(data){
-							console.log(data);
-							if(data.ok){
-						    	//window.location.href = '?cuenta='+data.id;
-							}
-						},
-						error: function(e){
-						    console.log(e.message);
-						}
-					});
-				}
-			}
-		});
-
-		$("#monto, #monto2").on('input',function(){
-			var totalCuenta = parseInt($(this).parent().parent().parent().parent().parent().find(".total").html());
-			var monto1 = $("#monto").val() || 0,
-				monto2 = $("#monto2").val() || 0;
-
-			var sobra = -(totalCuenta-parseInt(monto1)-parseInt(monto2));
-
-			$("#sobra").html(sobra);
-
-			if(sobra<0){
-				$("#sobra").addClass('text-danger');
-			}else{
-				$("#sobra").removeClass('text-danger');
-			}
-		});
-
-		$('#modalNuevaCuenta').on('shown.bs.modal', function () {
-		    $("#nombreNuevaCuenta").focus();
-		});
-		$('#modalNuevaCuenta').on('hidden.bs.modal', function () {
-		    $("#nombreNuevaCuenta").val('');
-		});
-
-		$('#modalComentario').on('shown.bs.modal', function () {
-		    $("#comentario").focus();
-		});
-		$('#modalComentario').on('hidden.bs.modal', function () {
-		    $("#comentario").val('');
-		    comentando = null;
-		});
-
-		$(document).on("change", "[name=cuentaActivaRadio]", function(){
-			$("[data-active=1]").attr("data-active", "0");
-			$(this).parent().parent().parent().attr("data-active", "1");
-		});
-
-		$(document).on("click touchend", ".mesasActivasContainer > button", function(){
-			var nombre = $(this).html();
-			lista = $("[data-nombre="+nombre);
-			$(this).toggleClass("disabled");
-			if(lista.attr("data-active")=="1"){
-				lista.attr("data-active",0);
-				lista.find("[name=cuentaActivaRadio]").prop("checked", false);
-				if(lista.nextAll(":not(.hide)").length){
-					$(lista.nextAll(":not(.hide)")[0]).find("[name=cuentaActivaRadio]").prop("checked", true).change();
-				}else if(lista.prevAll(":not(.hide)").length){
-					$(lista.prevAll(":not(.hide)")[0]).find("[name=cuentaActivaRadio]").prop("checked", true).change();
-				}
-			}else if(lista.hasClass("hide")){
-				lista.find("[name=cuentaActivaRadio]").prop("checked", true).change();
-			}
-			lista.toggleClass("hide");
-		});
-
-		$(document).on("click touchend", ".btn-comentario", function(){
-			var element = $(this);
-			comentando = element;
-			if(element.attr("data-cuenta") == 1){
-				var nombreCuenta = element.parent().parent().find('.tituloCuenta').html();
-				$("#labelComentario").html(nombreCuenta);
-			}else{
-				var nombreProducto = element.parent().parent().find('.nombre').html();
-				var nombreCuenta = element.closest('[data-nombre]').attr("data-nombre");
-				$("#labelComentario").html(nombreCuenta +" | "+ nombreProducto);
-			}
-			$("#comentario").val(element.parent().parent().attr("data-comentario"));
-		});
-
-		$("#ingresarComentario").submit(function(e){
-			e.preventDefault();
-			comentando.parent().parent().attr("data-comentario", $("#comentario").val());
-			if($("#comentario").val().length > 0){
-				comentando.removeClass("btn-info");
-				comentando.addClass("btn-success");
-			}else{
-				comentando.addClass("btn-info");
-				comentando.removeClass("btn-success");
-			}
-			$(this).parent().modal('hide');
-			
-		});
-	</script>
+	<script src="cuenta.js"></script>
 <?php
 	include_once 'footer.php';
 ?>
