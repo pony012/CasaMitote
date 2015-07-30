@@ -418,11 +418,6 @@
 				comentario 		= parent.attr("data-comentario");
 				id				= parent.attr("data-id");
 			if(ulActivo.length!=0){
-				/*
-				* TODO
-				*	Enviar petición ajax para pedir la comanda
-				*/
-
 				var cuenta = {
 								nombre		: parent.attr("data-nombre"),
 								grupo		: parent.attr("data-grupo"),
@@ -441,25 +436,27 @@
 							area: producto.attr("data-area")
 						});
 					}
-					//tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
 				});
-				$.ajax({
-					type: "POST",
-					dataType: "json",
-					url: "pedirComanda.php",
-					data: {
-						'cuenta':cuenta
-					},
-					//contentType: "application/json; charset=utf-8",
-					success: function(data){
-					    console.log("Added");
-					},
-					error: function(e){
-					    console.log(e.message);
-					}
-				});
-				console.log(cuenta);
-				//tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
+				if(cuenta.productos.length != 0){
+					//console.log(cuenta);
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "pedirComanda.php",
+						data: {
+							'cuenta':cuenta
+						},
+						success: function(data){
+							console.log(data);
+							if(data.ok){
+						    	//window.location.href = '?cuenta='+data.id;
+							}
+						},
+						error: function(e){
+						    console.log(e.message);
+						}
+					});
+				}
 			}
 		});
 
