@@ -89,6 +89,7 @@
 				if($result->field_count > 0){
 					$result = $result->fetch_array();
 					if(strcmp($result['password'],$pass)==0){
+						session_set_cookie_params(0);
 						session_start();
 						//md5(md5("1234")."astrum1234".md5("astr"))
 						//b956f5207a5f0bfa514292171f1c285f
