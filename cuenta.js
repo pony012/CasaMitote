@@ -93,7 +93,7 @@ $(function(){
 		crearLista($(v).find(".simpleList")[0], $(v).attr('data-grupo'));
 		var boton = $('<button type="button" class="btn btn-primary btn-lg" style="margin: 5px;" data-nombre-boton="'+nombre+'">'+nombre+'</button>');
 		$(".mesasActivasContainer").append(boton);
-		if($(v).attr('data-active')==0){
+		if($(v).attr('data-seleccionada')==0){
 			boton.trigger('click');
 		}
 	});
@@ -103,6 +103,7 @@ $(function(){
 			var otherList = $("#mainList").clone();
 			otherList.attr("data-nombre", nombre);
 			otherList.attr("data-grupo", grupo);
+			otherList.attr("data-comentario", "");
 			otherList.attr("data-iter", 0);
 			otherList.removeAttr("id");
 			otherList.find(".tituloCuenta").html(nombre);
@@ -160,50 +161,57 @@ $(function(){
 	});
 
 	$(".pedirComanda").on('click touchend', function(){
-		var ulActivo 		= $("#listasContainer>[data-active=1]>ul");
-		var parent 			= ulActivo.parent();
-		var nombreCuenta 	= parent.attr("data-nombre"),
-			grupo 			= parent.attr("data-grupo");
-			comentario 		= parent.attr("data-comentario").replace(/<br \/>/g, "\n");
-			id				= parent.attr("data-id");
-		if(ulActivo.length!=0){
-			var cuenta = {
-							nombre		: parent.attr("data-nombre"),
-							grupo		: parent.attr("data-grupo"),
-							comentario	: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
-							id			: parent.attr("data-id"),
-							productos	:[],
-						};
-			$.each(ulActivo.find("li"), function(k,v){
-				var producto = $(v).children();
-				if(producto.attr("data-pedido")==0){
+		var ulActivoGrupo	= $("#listasContainer>[data-active=1]>ul");
+		var nombreSelec		= ulActivoGrupo.parent().attr("data-nombre");
+		var grupo 			= ulActivoGrupo.parent().attr("data-grupo");
+		
+		if(ulActivoGrupo.length!=0){
+			var cuentas = [];
+			$.each($("[data-grupo="+grupo+"]>ul"), function(k,v){
+				var ulActivo = $(v);
+				var parent = ulActivo.parent();
+				var nombreCuenta 	= parent.attr("data-nombre"),
+					comentario 		= parent.attr("data-comentario").replace(/<br \/>/g, "\n");
+					id				= parent.attr("data-id");
+				var cuenta = {
+								nombre		: parent.attr("data-nombre"),
+								grupo		: parent.attr("data-grupo"),
+								comentario	: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
+								id			: parent.attr("data-id"),
+								productos	: [],
+								selec		: nombreSelec == parent.attr("data-nombre")?1:0
+							};
+				$.each(ulActivo.find("li"), function(k,v){
+					var producto = $(v).children();
+					
 					$(v).find(".botones").addClass("hide");
-					producto.attr("data-pedido", 1);
 					cuenta.productos.push({
 						id: producto.attr("data-id"),
 						comentario: producto.attr("data-comentario").replace(/<br \/>/g, "\n"),
-						area: producto.attr("data-area")
+						area: producto.attr("data-area"),
+						pedido: producto.attr("data-pedido")
 					});
+					producto.attr("data-pedido", 1);
+				});
+				cuentas.push(cuenta);
+			});
+			console.log(cuentas);
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "pedirComanda.php",
+				data: {
+					'cuentas':cuentas
+				},
+				success: function(data){
+					if(data.ok){
+				    	window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString();
+					}
+				},
+				error: function(e){
+				    console.log(e.message);
 				}
 			});
-			if(cuenta.productos.length != 0){
-				$.ajax({
-					type: "POST",
-					dataType: "json",
-					url: "pedirComanda.php",
-					data: {
-						'cuenta':cuenta
-					},
-					success: function(data){
-						if(data.ok){
-					    	window.location.href = '?cuenta='+data.id;
-						}
-					},
-					error: function(e){
-					    console.log(e.message);
-					}
-				});
-			}
 		}
 	});
 
@@ -243,6 +251,12 @@ $(function(){
 		$(this).parent().parent().parent().attr("data-active", "1");
 	});
 
+	$(document).on("click touchend", ".btn-eliminar-cuenta", function(){
+		var element = $(this);
+		var cuenta = element.closest(".listas-secundarias");
+		$("[data-nombre-boton="+cuenta.attr("data-nombre")+"]").remove();
+		cuenta.remove();
+	});
 
 	$(document).on("click touchend", ".btn-comentario", function(){
 		var element = $(this);
