@@ -53,7 +53,7 @@ $(function(){
 			 		jEl.find(".botones").removeClass("hide");
 			 	}
 			 	jEl.find('.btn-eliminar').on('click touchend', function(){
-			 		jEl.parent().parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
+			 		jEl.closest('.listas-secundarias').find("[name=cuentaActivaRadio]").prop("checked", true).change();
 
 			 		jEl.remove();
 			 		
@@ -126,7 +126,7 @@ $(function(){
 			var otherList = clonarLista(nombre, nombre);
 			$("#mainList").parent().append(otherList);
 			$("#alertNuevaCuenta").addClass("hide")
-			$(this).parent().modal('hide');
+			$(this).closest('.modal').modal('hide');
 		}else{
 			$("#alertNuevaCuenta").removeClass("hide")
 		}
@@ -155,7 +155,7 @@ $(function(){
 			tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
 			$("#sobra").html(-ulActivo.parent().find(".total").html());
 			$("#sobra").addClass('text-danger');
-			$("#monto").val('');
+			$("#monto1").val('');
 			$("#monto2").val('');
 			tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
 		}
@@ -221,9 +221,9 @@ $(function(){
 		}
 	});
 
-	$("#monto, #monto2").on('input',function(){
-		var totalCuenta = parseInt($(this).parent().parent().parent().parent().parent().find(".total").html());
-		var monto1 = $("#monto").val() || 0,
+	$("#monto1, #monto2").on('input',function(){
+		var totalCuenta = parseInt($(this).closest('.modal-body').find(".total").html());
+		var monto1 = $("#monto1").val() || 0,
 			monto2 = $("#monto2").val() || 0;
 
 		var sobra = -(totalCuenta-parseInt(monto1)-parseInt(monto2));
@@ -254,7 +254,7 @@ $(function(){
 
 	$(document).on("change", "[name=cuentaActivaRadio]", function(){
 		$("[data-active=1]").attr("data-active", "0");
-		$(this).parent().parent().parent().attr("data-active", "1");
+		$(this).closest('.listas-secundarias').attr("data-active", "1");
 	});
 
 	$(document).on("click touchend", ".btn-eliminar-cuenta", function(){
@@ -268,15 +268,14 @@ $(function(){
 		var element = $(this);
 		comentando = element;
 		if(element.attr("data-cuenta") == 1){
-			var nombreCuenta = element.parent().parent().find('.tituloCuenta').html();
+			var nombreCuenta = element.closest('.listas-secundarias').find('.tituloCuenta').html();
 			$("#labelComentario").html(nombreCuenta);
 		}else{
-			var nombreProducto = element.parent().parent().find('.nombre').html();
+			var nombreProducto = element.closest('li').find('.nombre').html();
 			var nombreCuenta = element.closest('[data-nombre]').attr("data-nombre");
 			$("#labelComentario").html(nombreCuenta +" | "+ nombreProducto);
 		}
-		_el = element.parent().parent();
-		$("#comentario").val(element.parent().parent().attr("data-comentario").replace(/<br \/>/g, "\n"));
+		$("#comentario").val(element.closest('[data-comentario]').attr("data-comentario").replace(/<br \/>/g, "\n"));
 	});
 
 	$("#ingresarComentario").submit(function(e){
@@ -289,7 +288,7 @@ $(function(){
 			comentando.addClass("btn-info");
 			comentando.removeClass("btn-success");
 		}
-		$(this).parent().modal('hide');
+		$(this).closest('.modal').modal('hide');
 		
 	});
 });
