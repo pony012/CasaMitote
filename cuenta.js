@@ -90,6 +90,7 @@ $(function(){
 
 	$.each($('.listas-secundarias:not(#mainList)'), function(k, v){
 		var nombre = $(v).attr("data-nombre");
+		$(v).attr("data-iter", $("[data-grupo="+$(v).attr("data-grupo")+"]").length - 1);
 		crearLista($(v).find(".simpleList")[0], $(v).attr('data-grupo'));
 		var boton = $('<button type="button" class="btn btn-primary btn-lg" style="margin: 5px;" data-nombre-boton="'+nombre+'">'+nombre+'</button>');
 		$(".mesasActivasContainer").append(boton);
@@ -206,6 +207,11 @@ $(function(){
 				success: function(data){
 					if(data.ok){
 				    	window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString();
+					}else if(data.pedirLogin){
+						/**
+						* TODO
+						* Abrir panel de login y hacer petición ajax, después re-pedir la comanda (si fue logueado con éxito).
+						*/
 					}
 				},
 				error: function(e){
