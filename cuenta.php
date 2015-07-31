@@ -244,14 +244,14 @@
 	</div>
 
 	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-		<form method="POST" action="">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" id="myModalLabel"></h4>
-					</div>
-					<div class="modal-body">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel"></h4>
+				</div>
+				<div class="modal-body">
+					<form method="POST" action="">
 						<table class="table table-striped">
 							<thead>
 								<tr>
@@ -276,7 +276,7 @@
 								<div class="col-xs-6">
 									<div class="form-group">
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1"> Efectivo
+										  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" checked="checked"> Efectivo
 										</label>
 										<label class="radio-inline">
 										  <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> Tarjeta
@@ -293,7 +293,7 @@
 										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio3" value="option3"> Efectivo
 										</label>
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio4" value="option4"> Tarjeta
+										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio4" value="option4" checked="checked"> Tarjeta
 										</label>
 									</div>
 									<div class="form-group">
@@ -309,62 +309,60 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-						<button type="button" class="btn btn-success">Cobrar</button>
-					</div>
-					</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<button type="button" class="btn btn-success">Cobrar</button>
 				</div>
 			</div>
-		</form>
+		</div>
+		
 	</div>
 
-	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelNuevaCuenta" id="modalNuevaCuenta">
-		<form action="" id="crearCuenta">
-			<div class="modal-dialog modal-sm">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" id="labelNuevaCuenta">Abrir Cuenta</h4>
-					</div>
-					<div class="modal-body">
+	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelNuevaCuenta" id="modalNuevaCuenta">	
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="labelNuevaCuenta">Abrir Cuenta</h4>
+				</div>
+				<div class="modal-body">
+					<form action="" id="crearCuenta">
 						<div class="form-group">
 							<input type="text" class="form-control" placeholder="Nombre de la cuenta" id="nombreNuevaCuenta">
 						</div>
 						<div class="alert alert-warning hide" id="alertNuevaCuenta" role="alert">Ese nombre ya existe :(</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-						<button type="submit" class="btn btn-success">Crear</button>
-					</div>
-					</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<button type="submit" class="btn btn-success">Crear</button>
 				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 	
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelComentario" id="modalComentario">
-		<form action="" id="ingresarComentario">
-			<div class="modal-dialog modal-sm">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" id="labelComentario"></h4>
-					</div>
-					<div class="modal-body">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="labelComentario"></h4>
+				</div>
+				<div class="modal-body">
+					<form action="" id="ingresarComentario">
 						<div class="form-group">
 							<textarea class="form-control" name="comentario" id="comentario" placeholder="Comentario..."></textarea>
 						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-						<button type="submit" class="btn btn-success">Aplicar Comentario</butoton>
-					</div>
-					</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+					<button type="submit" class="btn btn-success">Aplicar Comentario</button>
 				</div>
 			</div>
-		</form>
+		</div>
 	</div>
 	<script src="cuenta.js"></script>
 <?php
