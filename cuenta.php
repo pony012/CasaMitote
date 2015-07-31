@@ -246,12 +246,13 @@
 	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="myModalLabel"></h4>
-				</div>
-				<div class="modal-body">
-					<form method="POST" action="">
+				<form method="POST" action="cobrarCuenta.php" id="cobrarCuentaForm">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="myModalLabel"></h4>
+					</div>
+					<div class="modal-body">
+						<input type="hidden" name="idCuenta" id="idCobrarCuenta" value="">
 						<table class="table table-striped">
 							<thead>
 								<tr>
@@ -276,24 +277,24 @@
 								<div class="col-xs-6">
 									<div class="form-group">
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" checked="checked"> Efectivo
+										  <input type="radio" name="metodoPago1" id="inlineRadio1" value="efectivo" checked="checked"> Efectivo
 										</label>
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> Tarjeta
+										  <input type="radio" name="metodoPago1" id="inlineRadio2" value="tarjeta"> Tarjeta
 										</label>
 									</div>
 									<div class="form-group">
-										<label for="monto">Monto</label>
-										<input name="monto" id="monto" type="number" placeholder="Monto" class="form-control">
+										<label for="monto1">Monto</label>
+										<input name="monto1" id="monto1" type="number" placeholder="Monto" class="form-control">
 									</div>
 								</div>
 								<div class="col-xs-6">
 									<div class="form-group">
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio3" value="option3"> Efectivo
+										  <input type="radio" name="metodoPago2" id="inlineRadio3" value="efectivo"> Efectivo
 										</label>
 										<label class="radio-inline">
-										  <input type="radio" name="inlineRadioOptions2" id="inlineRadio4" value="option4" checked="checked"> Tarjeta
+										  <input type="radio" name="metodoPago2" id="inlineRadio4" value="tarjeta" checked="checked"> Tarjeta
 										</label>
 									</div>
 									<div class="form-group">
@@ -309,12 +310,12 @@
 								</div>
 							</div>
 						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-					<button type="button" class="btn btn-success">Cobrar</button>
-				</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="submit" class="btn btn-success">Cobrar</button>
+					</div>
+				</form>
 			</div>
 		</div>
 		
@@ -323,22 +324,22 @@
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelNuevaCuenta" id="modalNuevaCuenta">	
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="labelNuevaCuenta">Abrir Cuenta</h4>
-				</div>
-				<div class="modal-body">
-					<form action="" id="crearCuenta">
+				<form action="" id="crearCuenta">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="labelNuevaCuenta">Abrir Cuenta</h4>
+					</div>
+					<div class="modal-body">
 						<div class="form-group">
 							<input type="text" class="form-control" placeholder="Nombre de la cuenta" id="nombreNuevaCuenta">
 						</div>
 						<div class="alert alert-warning hide" id="alertNuevaCuenta" role="alert">Ese nombre ya existe :(</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-					<button type="submit" class="btn btn-success">Crear</button>
-				</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="submit" class="btn btn-success">Crear</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -346,21 +347,21 @@
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelComentario" id="modalComentario">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="labelComentario"></h4>
-				</div>
-				<div class="modal-body">
-					<form action="" id="ingresarComentario">
+				<form action="" id="ingresarComentario">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="labelComentario"></h4>
+					</div>
+					<div class="modal-body">
 						<div class="form-group">
 							<textarea class="form-control" name="comentario" id="comentario" placeholder="Comentario..."></textarea>
 						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-					<button type="submit" class="btn btn-success">Aplicar Comentario</button>
-				</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="submit" class="btn btn-success">Aplicar Comentario</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
