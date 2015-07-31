@@ -7,7 +7,8 @@
 	$returnObj = array(
 		'ok' => false,
 		'selec' => NULL,
-		'ids' => array()
+		'ids' => array(),
+		'pedirLogin' => 0
 		);
 
 	$idUsuario = isset($_SESSION['user'])?(is_numeric($_SESSION['user'])?$_SESSION['user']:NULL):NULL;
@@ -18,11 +19,13 @@
 		* Catchar la autentificación
 		*/
 		$returnObj['error'] = array('code'=>3,'description'=>'No hay usuario ingresado en sistema');
+		$returnObj['pedirLogin'] = 1;
 		echo json_encode($returnObj);
 		exit;
 	}
 
 	foreach ($cuentas as $iterCuenta => $cuenta) {
+		$cuenta['productos'] = (isset($cuenta['productos'])?$cuenta['productos']:array());
 		//Se insertan los precios y nombres de los productos seleccionados
 		$productoConsultaMdl = new BaseMdl();
 		foreach ($cuenta['productos'] as $key => $producto) {
@@ -61,8 +64,9 @@
 		$comentarioCuenta	= $baseMdl->driver->real_escape_string(str_replace(array("\r\n", "\r", "\n"), "<br />",$cuenta['comentario']));
 		$idCuenta			= isset($cuenta['id'])?(is_numeric($cuenta['id'])?$cuenta['id']:NULL):NULL;
 		$fechaHora			= date("Y-m-d H:i:s");
+		$activa				= count($cuenta['productos'])>0?1:0;
 
-		if($idCuenta == NULL){
+		if($idCuenta == NULL && $activa == 1){
 			$stmtCuenta = $baseMdl->driver->prepare("INSERT INTO Cuentas(idUsuario, fechaHora, pagada, activa, nombre, grupo, comentario)
 																VALUES(?, ?, 0, 1, ?, ?, ?)");
 			if(!$stmtCuenta->bind_param('issss',$idUsuario, $fechaHora, $nombreCuenta, $grupo, $comentarioCuenta)){
@@ -81,9 +85,9 @@
 			$stmtCuenta->close();
 		}else{
 			$stmtCuenta = $baseMdl->driver->prepare("UPDATE Cuentas 
-														SET fechaHora = ?, comentario = ? 
+														SET fechaHora = ?, comentario = ?, activa = ?
 														WHERE idCuenta = ?");
-			if(!$stmtCuenta->bind_param('ssi', $fechaHora, $comentarioCuenta, $idCuenta)){
+			if(!$stmtCuenta->bind_param('ssii', $fechaHora, $comentarioCuenta, $activa, $idCuenta)){
 				$returnObj['error'] = array('code'=>4,'description'=>'Error en bind_param de update en Cuentas');
 				echo json_encode($returnObj);
 				exit;
