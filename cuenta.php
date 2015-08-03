@@ -331,7 +331,7 @@
 									</div>
 									<div class="form-group">
 										<label for="monto1">Monto</label>
-										<input name="monto1" id="monto1" type="number" placeholder="Monto" class="form-control">
+										<input name="monto1" id="monto1" type="number" step="any" min="0" placeholder="Monto" class="form-control">
 									</div>
 								</div>
 								<div class="col-xs-6">
@@ -345,7 +345,7 @@
 									</div>
 									<div class="form-group">
 										<label for="monto2">Monto</label>
-										<input name="monto2" id="monto2" type="number" placeholder="Monto" class="form-control">
+										<input name="monto2" id="monto2" type="number" step="any" min="0" placeholder="Monto" class="form-control">
 									</div>
 								</div>	
 								<div class="col-xs-12">
