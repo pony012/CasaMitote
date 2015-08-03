@@ -1,5 +1,6 @@
 <?php
 	include_once 'functions.php';
+	include_once 'escpos-php/Escpos.php';
 	session_start();
 
 	$cuentas = $_POST['cuentas'];
@@ -119,14 +120,18 @@
 		}
 
 		//Se insertan los productos en la cuenta
+		
 		$productoMdl = new BaseMdl();
+		
+		$pedir = array();
 		foreach ($cuenta['productos'] as $key => $producto) {
 			if($producto['pedido'] == 0){
-				/**
-				* ToDo
-				*	Imprimir la(s) comanda(s)
-				*/
+				if(!isset($pedir[$producto['area']])){
+					$pedir[$producto['area']] = array();
+				}
+				$pedir[$producto['area']][] = $producto;
 			}
+			
 			$producto['id'] 		= is_numeric($producto['id'])?$producto['id']:die(json_encode($returnObj));
 			$producto['precio'] 	= is_numeric($producto['precio'])?$producto['precio']:die(json_encode($returnObj));
 			$producto['comentario'] = $baseMdl->driver->real_escape_string(str_replace(array("\r\n", "\r", "\n"), "<br />",$producto['comentario']));
@@ -146,6 +151,62 @@
 				
 			}
 			$stmtProducto->close();
+		}
+
+		foreach ($pedir as $key => $area) {
+			if(strcmp($key, 'Barra')==0){
+				try{
+					$connector = new FilePrintConnector("/dev/usb/lp0");
+					$printer = new Escpos($connector);
+					$printer -> text(str_pad($cuenta['nombre'], 32, " ", STR_PAD_BOTH)."\n");
+					$printer -> text(str_pad($fechaHora, 32, " ", STR_PAD_BOTH)."\n");
+					if(!empty($cuenta['comentario'])){
+						$cuenta['comentario'] = str_replace("\n", "\n  ", $cuenta['comentario']);
+						$printer -> text('*'.$cuenta['comentario']."\n");
+					}
+					foreach ($area as $key => $producto) {
+						$printer -> text('•'.$producto['nombre']."\n");
+						if(!empty($producto['comentario'])){
+							$producto['comentario'] = str_replace("\n", "\n  ", $producto['comentario']);
+							$printer -> text('  '.$producto['comentario']."\n");
+						}
+					}
+					$printer -> text(str_pad('', 32, "_", STR_PAD_BOTH));
+					$printer -> text("\n\n\n");
+					$printer -> cut();
+					$printer -> close();
+				}catch(Exception $e){
+					/**
+					* ToDo
+					*/
+				}
+			}else if(strcmp($key, 'Cocina')==0){
+				try{
+					$connector = new FilePrintConnector("/dev/usb/lp0");
+					$printer = new Escpos($connector);
+					$printer -> text(str_pad($cuenta['nombre'], 32, " ", STR_PAD_BOTH)."\n");
+					$printer -> text(str_pad($fechaHora, 32, " ", STR_PAD_BOTH)."\n");
+					if(!empty($cuenta['comentario'])){
+						$cuenta['comentario'] = str_replace("\n", "\n  ", $cuenta['comentario']);
+						$printer -> text('*'.$cuenta['comentario']."\n");
+					}
+					foreach ($area as $key => $producto) {
+						$printer -> text('•'.$producto['nombre']."\n");
+						if(!empty($producto['comentario'])){
+							$producto['comentario'] = str_replace("\n", "\n  ", $producto['comentario']);
+							$printer -> text('  '.$producto['comentario']."\n");
+						}
+					}
+					$printer -> text(str_pad('', 32, "_", STR_PAD_BOTH));
+					$printer -> text("\n\n\n");
+					$printer -> cut();
+					$printer -> close();
+				}catch(Exception $e){
+					/**
+					* ToDo
+					*/
+				}
+			}
 		}
 		array_push($returnObj['ids'], $idCuenta);
 		if($cuenta['selec']==1){
