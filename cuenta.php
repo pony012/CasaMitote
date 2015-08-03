@@ -227,14 +227,17 @@
 					<div class="text-center col-xs-4">
 						<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
 					</div>
-					<div class="text-center col-xs-4">
-						<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
-					</div>
 				</div>
 				<div class="row" style="margin-bottom: 15px;">
 					<div class="text-center col-xs-4">
 						<button class="btn btn-success pedirComanda">Pedir Comanda</button>
 					</div>	
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success pedirCuenta">Pedir Cuenta</button>
+					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
+					</div>
 				</div>
 			</div>
 <?php
@@ -243,10 +246,51 @@
 		</div>
 	</div>
 
-	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="modalPedirCuenta">
 		<div class="modal-dialog">
 			<div class="modal-content">
-				<form method="POST" action="cobrarCuenta.php" id="cobrarCuentaForm">
+				<form method="POST" id="pedirCuentaForm">
+					<input type="hidden" name="idCuenta" id="idPedirCuenta" value="">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="myModalLabel"></h4>
+					</div>
+					<div class="modal-body">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>Producto</th>
+									<th>Costo</th>
+								</tr>
+							</thead>
+							<tbody id="tabla-pedir-cuenta">
+								
+							</tbody>
+							<tfoot>
+								<tr>
+									<td><b>Subtotal</b></td>
+									<td class="sub-total"></td>
+								</tr>
+								<tr>
+									<td><b>Total</b></td>
+									<td class="total"></td>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+						<button type="submit" class="btn btn-success">Pedir</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="modalCobrarCuenta">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form method="POST" id="cobrarCuentaForm">
 					<input type="hidden" name="idCuenta" id="idCobrarCuenta" value="">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -258,8 +302,6 @@
 								<tr>
 									<th>Producto</th>
 									<th>Costo</th>
-									<th>Subtotal</th>
-									<th>Total</th>
 								</tr>
 							</thead>
 							<tbody id="tabla-cuenta">
@@ -267,7 +309,11 @@
 							</tbody>
 							<tfoot>
 								<tr>
-									<td colspan="3" class="sub-total text-right"></td>
+									<td><b>Subtotal</b></td>
+									<td class="sub-total"></td>
+								</tr>
+								<tr>
+									<td><b>Total</b></td>
 									<td class="total"></td>
 								</tr>
 							</tfoot>
@@ -310,6 +356,8 @@
 								</div>
 							</div>
 						</div>
+						<div class="alert alert-warning hide text-center" id="alertProductosSinPedir" role="alert">Aún hay productos por pedir.</div>
+						<div class="alert alert-warning hide text-center" id="alertCantidadInsuficiente" role="alert">Cantidad de dinero insuficiente.</div>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
@@ -318,7 +366,6 @@
 				</form>
 			</div>
 		</div>
-		
 	</div>
 
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelNuevaCuenta" id="modalNuevaCuenta">	
