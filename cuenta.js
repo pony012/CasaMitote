@@ -26,7 +26,7 @@ $(function(){
 				var totalContainer = null;
 				if($(evt.from).hasClass("simpleList")){
 					totalContainer = $(evt.from).parent().find(".total-cuenta");
-				 	subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) - parseInt(jEl.find('.precio').html());
+				 	subTotal = parseFloat(totalContainer.find(".sub-total").attr('data-subtotal')) - parseFloat(jEl.find('.precio').html());
 				 	
 				 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 				 	totalContainer.find(".sub-total").html(subTotal);
@@ -41,7 +41,7 @@ $(function(){
 			 	ul.parent().find("[name=cuentaActivaRadio]").prop("checked", true).change();
 
 			 	totalContainer = ul.parent().find(".total-cuenta");
-			 	subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) + parseInt(jEl.find('.precio').html());
+			 	subTotal = parseFloat(totalContainer.find(".sub-total").attr('data-subtotal')) + parseFloat(jEl.find('.precio').html());
 			 	
 			 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 			 	totalContainer.find(".sub-total").html(subTotal);
@@ -57,7 +57,7 @@ $(function(){
 
 			 		jEl.remove();
 			 		
-			 		var subTotal = parseInt(totalContainer.find(".sub-total").attr('data-subtotal')) - parseInt(jEl.find('.precio').html());
+			 		var subTotal = parseFloat(totalContainer.find(".sub-total").attr('data-subtotal')) - parseFloat(jEl.find('.precio').html());
 			 	
 				 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 				 	totalContainer.find(".sub-total").html(subTotal);
@@ -69,6 +69,69 @@ $(function(){
 			scroll: true
 		 });
 	};
+
+	var pedirComanda = function(refresh, param, callback){
+		var ulActivoGrupo	= $("#listasContainer>[data-active=1]>ul");
+		var nombreSelec		= ulActivoGrupo.parent().attr("data-nombre");
+		var grupo 			= ulActivoGrupo.parent().attr("data-grupo");
+		
+		if(ulActivoGrupo.length!=0){
+			var cuentas = [];
+			$.each($("[data-grupo='"+grupo+"']>ul"), function(k,v){
+				var ulActivo = $(v);
+				var parent = ulActivo.parent();
+				var nombreCuenta 	= parent.attr("data-nombre"),
+					comentario 		= parent.attr("data-comentario").replace(/<br \/>/g, "\n");
+					id				= parent.attr("data-id");
+				var cuenta = {
+								nombre		: parent.attr("data-nombre"),
+								grupo		: parent.attr("data-grupo"),
+								comentario	: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
+								id			: parent.attr("data-id"),
+								productos	: [],
+								selec		: nombreSelec == parent.attr("data-nombre")?1:0
+							};
+				$.each(ulActivo.find("li"), function(k,v){
+					var producto = $(v).children();
+					
+					$(v).find(".botones").addClass("hide");
+					cuenta.productos.push({
+						id: producto.attr("data-id"),
+						comentario: producto.attr("data-comentario").replace(/<br \/>/g, "\n"),
+						area: producto.attr("data-area"),
+						pedido: producto.attr("data-pedido")
+					});
+					producto.attr("data-pedido", 1);
+				});
+				cuentas.push(cuenta);
+			});
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "pedirComanda.php",
+				data: {
+					'cuentas':cuentas
+				},
+				success: function(data){
+					if(data.ok){
+						if(refresh == true){
+				    		window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString();
+				    	}else{
+				    		callback(param);
+				    	}
+					}else if(data.pedirLogin){
+						/**
+						* TODO
+						* Abrir panel de login y hacer petición ajax, después re-pedir la comanda (si fue logueado con éxito).
+						*/
+					}
+				},
+				error: function(e){
+				    console.log(e.message);
+				}
+			});
+		}
+	}
 
 	$(document).on("click ", ".mesasActivasContainer > button", function(){
 		var nombre = $(this).html();
@@ -135,12 +198,58 @@ $(function(){
 	$(".dividirCuenta").on("click ",function(){
 		var lista = $("[data-active=1]");
 		if(lista.length != 0){
-			lista.attr("data-iter",parseInt(lista.attr("data-iter"))+1);
+			lista.attr("data-iter",parseFloat(lista.attr("data-iter"))+1);
 			var nombre = lista.attr("data-nombre")+'-'+lista.attr("data-iter");
 			var grupo = lista.attr("data-grupo");
 			var otherList = clonarLista(nombre, grupo);
 			lista.after(otherList);
 		}
+	});
+
+	$(".pedirCuenta").on('click ', function(){
+		var tabla = $("#tabla-pedir-cuenta");
+		tabla.empty();
+		var ulActivo = $("#listasContainer>[data-active=1]>ul");
+		if(ulActivo.closest('.listas-secundarias').attr("data-id") == undefined){
+			
+		}else{
+			if(ulActivo.length!=0){
+				var modal = $("#modalPedirCuenta");
+				modal.modal("show");
+				$('#idPedirCuenta').val(ulActivo.closest('.listas-secundarias').attr("data-id"));
+				modal.find('.modal-title').html(ulActivo.closest('.listas-secundarias').attr("data-nombre"));
+				$.each(ulActivo.find("li"), function(k,v){
+					tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
+				});
+				tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
+				tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
+			}
+		}
+	});
+
+	$("#pedirCuentaForm").submit(function(e){
+		e.preventDefault();
+		var cuentaActiva = $("#listasContainer>[data-active=1]");
+
+		pedirComanda(false, this, function(el){
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "pedirCuenta.php",
+				data: $(el).serialize(),
+				success: function(data){
+					if(data.ok){
+						$("#modalPedirCuenta").modal("hide")
+				    	window.location.href = '#';
+					}else if(data.pedirLogin){
+						
+					}
+				},
+				error: function(e){
+				    console.log(e.message);
+				}
+			})
+		});
 	});
 
 	$(".cobrarCuenta").on('click ', function(){
@@ -151,7 +260,7 @@ $(function(){
 			
 		}else{
 			if(ulActivo.length!=0){
-				var modal = $(".bs-example-modal-sm");
+				var modal = $("#modalCobrarCuenta");
 				modal.modal("show");
 				$('#idCobrarCuenta').val(ulActivo.closest('.listas-secundarias').attr("data-id"));
 				modal.find('.modal-title').html(ulActivo.closest('.listas-secundarias').attr("data-nombre"));
@@ -168,72 +277,58 @@ $(function(){
 		}
 	});
 
-	$(".pedirComanda").on('click ', function(){
-		var ulActivoGrupo	= $("#listasContainer>[data-active=1]>ul");
-		var nombreSelec		= ulActivoGrupo.parent().attr("data-nombre");
-		var grupo 			= ulActivoGrupo.parent().attr("data-grupo");
-		
-		if(ulActivoGrupo.length!=0){
-			var cuentas = [];
-			$.each($("[data-grupo='"+grupo+"']>ul"), function(k,v){
-				var ulActivo = $(v);
-				var parent = ulActivo.parent();
-				var nombreCuenta 	= parent.attr("data-nombre"),
-					comentario 		= parent.attr("data-comentario").replace(/<br \/>/g, "\n");
-					id				= parent.attr("data-id");
-				var cuenta = {
-								nombre		: parent.attr("data-nombre"),
-								grupo		: parent.attr("data-grupo"),
-								comentario	: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
-								id			: parent.attr("data-id"),
-								productos	: [],
-								selec		: nombreSelec == parent.attr("data-nombre")?1:0
-							};
-				$.each(ulActivo.find("li"), function(k,v){
-					var producto = $(v).children();
-					
-					$(v).find(".botones").addClass("hide");
-					cuenta.productos.push({
-						id: producto.attr("data-id"),
-						comentario: producto.attr("data-comentario").replace(/<br \/>/g, "\n"),
-						area: producto.attr("data-area"),
-						pedido: producto.attr("data-pedido")
-					});
-					producto.attr("data-pedido", 1);
-				});
-				cuentas.push(cuenta);
-			});
-			console.log(cuentas);
-			$.ajax({
-				type: "POST",
-				dataType: "json",
-				url: "pedirComanda.php",
-				data: {
-					'cuentas':cuentas
-				},
-				success: function(data){
-					if(data.ok){
-				    	window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString();
-					}else if(data.pedirLogin){
-						/**
-						* TODO
-						* Abrir panel de login y hacer petición ajax, después re-pedir la comanda (si fue logueado con éxito).
-						*/
+	$("#cobrarCuentaForm").submit(function(e){
+		e.preventDefault();
+		var cuentaActiva = $("#listasContainer>[data-active=1]");
+		var pedir = true;
+		if(cuentaActiva.find('[data-pedido=0]').length!=0){
+			$("#alertProductosSinPedir").removeClass("hide");
+			pedir = false;
+		}else{
+			$("#alertProductosSinPedir").addClass("hide");
+		}
+
+		if(parseFloat($("#sobra").html()) < 0){
+			$("#alertCantidadInsuficiente").removeClass("hide");
+			pedir = false;
+		}else{
+			$("#alertCantidadInsuficiente").addClass("hide");
+		}
+
+		if(pedir && cuentaActiva.attr("data-id") != '' && cuentaActiva.attr("data-id") != undefined){
+			pedirComanda(false, this, function(el){
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+					url: "cobrarCuenta.php",
+					data: $(el).serialize(),
+					success: function(data){
+						if(data.ok){
+							console.log(data);
+					    	window.location.href = '?';
+						}else if(data.pedirLogin){
+							
+						}
+					},
+					error: function(e){
+					    console.log(e.message);
 					}
-				},
-				error: function(e){
-				    console.log(e.message);
-				}
+				})
 			});
 		}
+		
+	});
+
+	$(".pedirComanda").on('click ', function(){
+		pedirComanda(true);		
 	});
 
 	$("#monto1, #monto2").on('input',function(){
-		var totalCuenta = parseInt($(this).closest('.modal-body').find(".total").html());
+		var totalCuenta = parseFloat($(this).closest('.modal-body').find(".total").html());
 		var monto1 = $("#monto1").val() || 0,
 			monto2 = $("#monto2").val() || 0;
 
-		var sobra = -(totalCuenta-parseInt(monto1)-parseInt(monto2));
+		var sobra = -(totalCuenta-parseFloat(monto1)-parseFloat(monto2));
 
 		$("#sobra").html(sobra);
 
@@ -257,6 +352,14 @@ $(function(){
 	$('#modalComentario').on('hidden.bs.modal', function () {
 	    $("#comentario").val('');
 	    comentando = null;
+	});
+
+	$('#modalCobrarCuenta').on('shown.bs.modal', function () {
+	    
+	});
+	$('#modalCobrarCuenta').on('hidden.bs.modal', function () {
+	    $("#alertProductosSinPedir").addClass("hide");
+	    $("#alertCantidadInsuficiente").addClass("hide");
 	});
 
 	$(document).on("change", "[name=cuentaActivaRadio]", function(){
@@ -299,4 +402,6 @@ $(function(){
 		$(this).closest('.modal').modal('hide');
 		
 	});
+
+	
 });
