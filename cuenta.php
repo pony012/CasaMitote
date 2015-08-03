@@ -247,12 +247,12 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<form method="POST" action="cobrarCuenta.php" id="cobrarCuentaForm">
+					<input type="hidden" name="idCuenta" id="idCobrarCuenta" value="">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						<h4 class="modal-title" id="myModalLabel"></h4>
 					</div>
 					<div class="modal-body">
-						<input type="hidden" name="idCuenta" id="idCobrarCuenta" value="">
 						<table class="table table-striped">
 							<thead>
 								<tr>
