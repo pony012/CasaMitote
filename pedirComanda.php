@@ -9,7 +9,8 @@
 		'ok' => false,
 		'selec' => NULL,
 		'ids' => array(),
-		'pedirLogin' => 0
+		'pedirLogin' => 0,
+		'errorImpresion' => 0
 		);
 
 	$idUsuario = isset($_SESSION['user'])?(is_numeric($_SESSION['user'])?$_SESSION['user']:NULL):NULL;
@@ -152,7 +153,6 @@
 			}
 			$stmtProducto->close();
 		}
-
 		foreach ($pedir as $key => $area) {
 			if(strcmp($key, 'Barra')==0){
 				try{
@@ -179,6 +179,7 @@
 					/**
 					* ToDo
 					*/
+					$returnObj['errorImpresion'] = 1;
 				}
 			}else if(strcmp($key, 'Cocina')==0){
 				try{
@@ -205,6 +206,7 @@
 					/**
 					* ToDo
 					*/
+					$returnObj['errorImpresion'] = 1;
 				}
 			}
 		}

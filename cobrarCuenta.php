@@ -7,6 +7,7 @@
 
 	$returnObj = array(
 		'ok' => false,
+		'errorImpresion' => 0
 		);
 
 	$idUsuario = isset($_SESSION['user'])?(is_numeric($_SESSION['user'])?$_SESSION['user']:NULL):NULL;
@@ -194,6 +195,7 @@
 			/**
 			* ToDo
 			*/
+			$returnObj['errorImpresion'] = 1;
 		}
 	}else{
 		$returnObj['error'] = array('code'=>6,'description'=>'Cantidad insuficiente, faltarian '.number_format($totalAPagar - $montoTotal));
