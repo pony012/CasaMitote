@@ -41,7 +41,7 @@ class FilePrintConnector implements PrintConnector {
 	 * @param string $filename
 	 */
 	public function __construct($filename) {
-		$this -> fp = fopen($filename, "wb+");
+		$this -> fp = @fopen($filename, "wb+");
 		if($this -> fp === false) {
 			throw new Exception("Cannot initialise FilePrintConnector.");
 		}
