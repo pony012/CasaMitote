@@ -65,6 +65,15 @@ $(function(){
 				 	totalContainer.find(".total").attr('data-total', subTotal);
 				 	totalContainer.find(".total").html(subTotal);
 			 	});
+
+			 	var listaOrigen = $(evt.from).closest(".listas-secundarias"),
+			 		listaDestino = $(evt.item).closest(".listas-secundarias");
+			 	if(listaOrigen.attr("data-grupo") == listaDestino.attr("data-grupo")){
+			 		listaDestino.find(".btn-eliminar-cuenta").addClass("hide");
+			 		if(listaOrigen.find("li").length == 0 && listaOrigen.attr("data-id") == undefined){
+			 			listaOrigen.find(".btn-eliminar-cuenta").removeClass("hide");
+			 		}
+			 	}
 			},
 			scroll: true
 		 });
@@ -115,7 +124,7 @@ $(function(){
 				success: function(data){
 					if(data.ok){
 						if(refresh == true){
-				    		window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString();
+				    		window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString()+'&ei='+data.errorImpresion;
 				    	}else{
 				    		callback(param);
 				    	}
@@ -239,7 +248,19 @@ $(function(){
 				data: $(el).serialize(),
 				success: function(data){
 					if(data.ok){
-						$("#modalPedirCuenta").modal("hide")
+						$("#modalPedirCuenta").modal("hide");
+						if(data.errorImpresion){
+							$("#errorImpresion").removeClass('hide');
+							$("#alert-container").append($('<div class="col-xs-4 col-xs-offset-4 alert alert-danger text-center" role="alert">'
+																+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+																+'<p>Hubo un problema al pedir la cuenta <b>'+$("#listasContainer>[data-active=1]").attr("data-nombre")+'</b></p>'
+															+'</div>'));
+						}else{
+							$("#alert-container").append($('<div class="col-xs-4 col-xs-offset-4 alert alert-success text-center" role="alert">'
+																+'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+																+'<p>Se pidió la cuenta <b>'+$("#listasContainer>[data-active=1]").attr("data-nombre")+'</b></p>'
+															+'</div>'));
+						}
 				    	window.location.href = '#';
 					}else if(data.pedirLogin){
 						
@@ -304,8 +325,7 @@ $(function(){
 					data: $(el).serialize(),
 					success: function(data){
 						if(data.ok){
-							console.log(data);
-					    	window.location.href = '?';
+					    	window.location.href = '?'+'&ei='+data.errorImpresion;
 						}else if(data.pedirLogin){
 							
 						}
