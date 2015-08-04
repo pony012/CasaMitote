@@ -1,6 +1,13 @@
 <?php
 	include_once 'header.php';
 ?>
+<div id="alert-container">
+	<div class="col-xs-4 col-xs-offset-4 alert alert-warning text-center <?php if(!(isset($_GET['ei']) && $_GET['ei'] == 1)){echo 'hide';}?>" id="errorImpresion" role="alert">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<p>Hubo un problema con las impresoras</p>
+	</div>
+</div>
+
 <style type="text/css">
 	a.panel-handle{
 	display: block;
@@ -407,6 +414,30 @@
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
 						<button type="submit" class="btn btn-success">Aplicar Comentario</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelLogin" id="modalLogin">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<form>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="labelLogin">Inicia Sesión para realizar esa acción</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+		                  <input type="text" placeholder="Nombre" class="form-control" name="user">
+		                </div>
+		                <div class="form-group">
+		                  <input type="password" placeholder="Password" class="form-control" name="pass">
+		                </div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">Entrar</button>
 					</div>
 				</form>
 			</div>
