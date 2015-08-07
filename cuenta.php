@@ -118,7 +118,7 @@
 		$seleccionadas		= isset($_GET['ids'])?explode(',', $_GET['ids']):array();
 
 		$stmt = $cuentaMdl->driver->prepare("SELECT * FROM Cuentas WHERE pagada = 0 AND activa = 1");
-		
+		$mesas = [];
 		if (!$stmt->execute()) {
 		}else{
 			$result = $stmt->get_result();
@@ -126,9 +126,10 @@
 				$i = 0;
 				while($cuenta = $result->fetch_array(MYSQLI_ASSOC)){
 					$total = 0;
+					$mesas[] = $cuenta;
 ?>
 				<div class="listas-secundarias col-xs-12"
-						data-seleccionada="<?php echo in_array($cuenta['idCuenta'], $seleccionadas)?1:0; ?>"
+						data-seleccionada="<?php echo $cuentaSeleccionada==$cuenta['idCuenta']||in_array($cuenta['idCuenta'], $seleccionadas)?1:0; ?>"
 						data-active="<?php echo $cuentaSeleccionada==$cuenta['idCuenta']?1:0;?>"
 						data-nombre="<?php echo $cuenta['nombre'];?>" 
 						data-grupo="<?php echo $cuenta['grupo'];?>"
@@ -143,7 +144,7 @@
 					</div>
 					<div class="botones" style="display: inline; margin-left:15px;">
 						<button class="btn btn-xs <?php echo strlen($cuenta['comentario'])>0?'btn-success':'btn-info';?> btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
-						<button class="btn btn-xs btn-danger btn-eliminar hide"><span class="glyphicon glyphicon-remove"></span></button>
+						<button class="btn btn-xs btn-danger btn-elimianr hide"><span class="glyphicon glyphicon-remove"></span></button>
 					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 <?php 
@@ -234,16 +235,19 @@
 					<div class="text-center col-xs-4">
 						<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
 					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-warning juntarCuentas" data-toggle="modal" data-target="#modalJuntarCuentas">Juntar Cuentas</button>
+					</div>
 				</div>
 				<div class="row" style="margin-bottom: 15px;">
 					<div class="text-center col-xs-4">
-						<button class="btn btn-success pedirComanda">Pedir Comanda</button>
+						<button class="btn btn-success pedirComanda">Imprimir Comanda</button>
 					</div>	
 					<div class="text-center col-xs-4">
-						<button class="btn btn-success pedirCuenta">Pedir Cuenta</button>
+						<button class="btn btn-success pedirCuenta">Imprimir Cuenta</button>
 					</div>
 					<div class="text-center col-xs-4">
-						<button class="btn btn-success cobrarCuenta">Cobrar Cuenta</button>
+						<button class="btn btn-success cobrarCuenta">Pagar Cuenta</button>
 					</div>
 				</div>
 			</div>
@@ -419,7 +423,51 @@
 			</div>
 		</div>
 	</div>
-
+	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelJuntar" id="modalJuntarCuentas">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<form id="formJuntarCuentas">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="labelJuntar">Juntar Cuentas</h4>
+					</div>
+					<div class="modal-body">
+						<div class="col-xs-12 hide" id="seleccionarCuentasDistintas">
+							<div class="text-center alert alert-warning">Debes seleccionar dos cuentas distintas</div>
+						</div>
+						<div data-toggle="buttons">
+<?php
+	foreach ($mesas as $cuenta) {
+?>
+							<label class="btn btn-primary btn-lg" style="margin: 5px;">
+								<input type="radio" name="mesa1" value="<?php echo $cuenta['idCuenta'];?>" id="<?php echo $cuenta['idCuenta'];?>" autocomplete="off" 
+										data-nombre-boton="<?php echo $cuenta['nombre'];?>"><?php echo $cuenta['nombre'];?>
+							</label>	
+<?php
+	}
+?>
+						</div>
+						<hr>
+					<div data-toggle="buttons">
+<?php
+	foreach ($mesas as $cuenta) {
+?>
+							<label class="btn btn-primary btn-lg" style="margin: 5px;">
+								<input type="radio" name="mesa2" value="<?php echo $cuenta['idCuenta'];?>" id="<?php echo $cuenta['idCuenta'];?>" autocomplete="off" 
+										data-nombre-boton="<?php echo $cuenta['nombre'];?>"><?php echo $cuenta['nombre'];?>
+							</label>	
+<?php
+	}
+?>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">Juntar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelLogin" id="modalLogin">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">

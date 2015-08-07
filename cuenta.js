@@ -124,10 +124,10 @@ $(function(){
 				success: function(data){
 					if(data.ok){
 						if(refresh == true){
-				    		window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString()+'&ei='+data.errorImpresion;
-				    	}else{
-				    		callback(param);
-				    	}
+							window.location.href = '?cuenta='+data.selec+'&ids='+data.ids.toString()+'&ei='+data.errorImpresion;
+						}else{
+							callback(param);
+						}
 					}else if(data.pedirLogin){
 						/**
 						* TODO
@@ -136,7 +136,7 @@ $(function(){
 					}
 				},
 				error: function(e){
-				    console.log(e.message);
+					console.log(e.message);
 				}
 			});
 		}
@@ -261,13 +261,13 @@ $(function(){
 																+'<p>Se pidió la cuenta <b>'+$("#listasContainer>[data-active=1]").attr("data-nombre")+'</b></p>'
 															+'</div>'));
 						}
-				    	window.location.href = '#';
+						window.location.href = '#';
 					}else if(data.pedirLogin){
 						
 					}
 				},
 				error: function(e){
-				    console.log(e.message);
+					console.log(e.message);
 				}
 			})
 		});
@@ -325,13 +325,13 @@ $(function(){
 					data: $(el).serialize(),
 					success: function(data){
 						if(data.ok){
-					    	window.location.href = '?'+'&ei='+data.errorImpresion;
+							window.location.href = '?'+'&ei='+data.errorImpresion;
 						}else if(data.pedirLogin){
 							
 						}
 					},
 					error: function(e){
-					    console.log(e.message);
+						console.log(e.message);
 					}
 				})
 			});
@@ -360,26 +360,26 @@ $(function(){
 	});
 
 	$('#modalNuevaCuenta').on('shown.bs.modal', function () {
-	    $("#nombreNuevaCuenta").focus();
+		$("#nombreNuevaCuenta").focus();
 	});
 	$('#modalNuevaCuenta').on('hidden.bs.modal', function () {
-	    $("#nombreNuevaCuenta").val('');
+		$("#nombreNuevaCuenta").val('');
 	});
 
 	$('#modalComentario').on('shown.bs.modal', function () {
-	    $("#comentario").focus();
+		$("#comentario").focus();
 	});
 	$('#modalComentario').on('hidden.bs.modal', function () {
-	    $("#comentario").val('');
-	    comentando = null;
+		$("#comentario").val('');
+		comentando = null;
 	});
 
 	$('#modalCobrarCuenta').on('shown.bs.modal', function () {
-	    
+		
 	});
 	$('#modalCobrarCuenta').on('hidden.bs.modal', function () {
-	    $("#alertProductosSinPedir").addClass("hide");
-	    $("#alertCantidadInsuficiente").addClass("hide");
+		$("#alertProductosSinPedir").addClass("hide");
+		$("#alertCantidadInsuficiente").addClass("hide");
 	});
 
 	$(document).on("change", "[name=cuentaActivaRadio]", function(){
@@ -423,5 +423,49 @@ $(function(){
 		
 	});
 
+	$('#modalJuntarCuentas').on('hidden.bs.modal', function () {
+		var container = $(this);
+		container.find("[type=submit]").prop('disabled', true);
+		container.find(".alert").addClass("hide");
+		var activos = container.find(".active");
+		$.each(activos, function(k,element){
+			$(element).removeClass("active");
+			$(element).children("input").prop("checked", false);
+		});
+	});
+
+	$('#modalJuntarCuentas').find('input[type=radio]').on("change", function(){
+		var container = $(this).closest('.modal-body');
+		var checked = container.find(".active > input");
+		if(checked.length==2){
+			if(checked[0].id==checked[1].id){
+				container.find("#seleccionarCuentasDistintas").removeClass("hide");
+				container.parent().find("[type=submit]").prop('disabled', true);
+			}else{
+				container.find("#seleccionarCuentasDistintas").addClass("hide");
+				container.parent().find("[type=submit]").prop('disabled', false);
+			}
+		}else{
+			container.parent().find("[type=submit]").prop('disabled', true);
+		}
+	});
+
+	$("#formJuntarCuentas").submit(function(e){
+		e.preventDefault();
+		$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "juntarCuentas.php",
+				data: $(this).serialize(),
+				success: function(data){
+					if(data.ok){
+						window.location.href = '?cuenta='+data.selec;
+					}
+				},
+				error: function(e){
+					console.log(e.message);
+				}
+		});
+	});
 	
 });
