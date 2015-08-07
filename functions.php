@@ -122,6 +122,7 @@
 			$output = array('User' => null,
 							'Parent' => null,
 							'HasParent' => false,
+							'Permissions' => array(),
 							'Error' => false );
 
 			$stmt = $userMdl->driver->prepare("SELECT * FROM Usuario WHERE idUsuario = ? AND activo = 1");
@@ -133,6 +134,19 @@
 				$result = $result->fetch_array();
 				if(strcmp($result['password'],$pass)==0){
 					$output['User'] = $result;
+
+					$stmt = $userMdl->driver->prepare("SELECT P.*
+														FROM  `Usuario` AS U
+														LEFT JOIN PermisosCuentas AS PC ON PC.idTipoDeCuenta = U.idTipoDeCuenta
+														LEFT JOIN Permisos AS P ON P.idPermiso = PC.idPermiso
+														WHERE U.idUsuario = ?");
+					$stmt->bind_param('i',$_user);
+					$stmt->execute();
+
+					$permisos = $stmt->get_result();
+					while($permiso = $permisos->fetch_array(MYSQLI_ASSOC)){
+						$output['Permissions'][] = $permiso;
+					}
 				}else{
 					$actualUser = $result;
 
@@ -167,6 +181,18 @@
 						$output['User'] = $actualUser;
 						$output['Parent'] = $user;
 						$output['HasParent'] = true;
+						$stmt = $userMdl->driver->prepare("SELECT P.*
+															FROM  `Usuario` AS U
+															LEFT JOIN PermisosCuentas AS PC ON PC.idTipoDeCuenta = U.idTipoDeCuenta
+															LEFT JOIN Permisos AS P ON P.idPermiso = PC.idPermiso
+															WHERE U.idUsuario = ?");
+						$stmt->bind_param('i',$output['User']['idUsuario']);
+						$stmt->execute();
+
+						$permisos = $stmt->get_result();
+						while($permiso = $permisos->fetch_array(MYSQLI_ASSOC)){
+							$output['Permissions'][] = $permiso;
+						}
 					}else{
 						$output['Error'] = true;
 					}
