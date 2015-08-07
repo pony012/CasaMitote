@@ -171,8 +171,8 @@
 									data-comentario="<?php echo $producto['comentario'];?>">
 								<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
 								<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
-								<div class="col-xs-3 botones hide">
-									<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
+								<div class="col-xs-3 botones">
+									<button class="btn btn-xs btn-info btn-comentario hide" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
 									<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
 								</div>
 							</div>
@@ -471,12 +471,15 @@
 	<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="labelLogin" id="modalLogin">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
-				<form>
+				<form id="formLogin">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 						<h4 class="modal-title" id="labelLogin">Inicia Sesión para realizar esa acción</h4>
 					</div>
 					<div class="modal-body">
+						<div class="col-xs-12 hide">
+							<div class="text-center alert alert-warning"></div>
+						</div>
 						<div class="form-group">
 		                  <input type="text" placeholder="Nombre" class="form-control" name="user">
 		                </div>

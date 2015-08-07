@@ -164,6 +164,14 @@ $(function(){
 		var nombre = $(v).attr("data-nombre");
 		$(v).attr("data-iter", $("[data-grupo='"+$(v).attr("data-grupo")+"']").length - 1);
 		crearLista($(v).find(".simpleList")[0], $(v).attr('data-grupo'));
+		$(v).find('.btn-eliminar').on('click touchstart', function(){
+	 		var idCuenta = $(this).closest('.listas-secundarias').attr('data-id');
+	 		var idProducto = $(this).closest('[data-pedido]').attr('data-id');
+	 		$("#modalLogin").attr("data-idCuenta", idCuenta);
+	 		$("#modalLogin").attr("data-idProducto", idProducto);
+	 		$("#modalLogin").attr("data-accion", "eliminarProducto");
+	 		$("#modalLogin").modal("show");
+	 	});
 		var boton = $('<button type="button" class="btn btn-primary btn-lg" style="margin: 5px;" data-nombre-boton="'+nombre+'">'+nombre+'</button>');
 		$(".mesasActivasContainer").append(boton);
 		if($(v).attr('data-seleccionada')==0){
@@ -466,6 +474,53 @@ $(function(){
 					console.log(e.message);
 				}
 		});
+	});
+
+	$("#formLogin").submit(function(e){
+		e.preventDefault();
+		var modal = $(this).closest(".modal");
+		var accion = modal.attr("data-accion");
+		if(accion=="eliminarProducto"){
+			var datos = $(this).serialize() + '&' + $.param({'idProducto':modal.attr("data-idProducto"),'idCuenta':modal.attr("data-idCuenta")});
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "eliminarProductoCuenta.php",
+				data: datos,
+				success: function(data){
+					if(data.ok){
+						window.location.href = '?cuenta='+data.selec;
+					}else{
+						var alertContainer = modal.find(".alert");
+						if(data.error.code == 5 || data.error.code == 6){
+							alertContainer.parent().removeClass("hide");
+							alertContainer.html("No se pudo acceder");
+							//No se pudo acceder
+						}else if(data.error.code == 7){
+							//Sin permisos suficientes
+							alertContainer.parent().removeClass("hide");
+							alertContainer.html("Esa cuenta no tiene permisos suficientes");
+						}else{
+							//Otro error
+							alertContainer.parent().removeClass("hide");
+							alertContainer.html("Hubo un error");
+						}
+					}
+				},
+				error: function(e){
+					console.log(e.message);
+				}
+			});
+		}
+	});
+
+	$('#modalLogin').on('hidden.bs.modal', function () {
+		var container = $(this);
+		container.attr("accion",'');
+		container.attr("idProducto",'');
+		container.attr("idCuenta",'');
+		container.find("input").val('');
+		container.find(".alert").parent().addClass("hide");
 	});
 	
 });
