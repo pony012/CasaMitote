@@ -127,10 +127,13 @@
 		$pedir = array();
 		foreach ($cuenta['productos'] as $key => $producto) {
 			if($producto['pedido'] == 0){
-				if(!isset($pedir[$producto['area']])){
-					$pedir[$producto['area']] = array();
+				$producto['area'] = explode(',', $producto['area']);
+				foreach ($producto['area'] as $k => $area) {
+					if(!isset($area)){
+						$pedir[$area] = array();
+					}
+					$pedir[$area][] = $producto;	
 				}
-				$pedir[$producto['area']][] = $producto;
 			}
 			
 			$producto['id'] 		= is_numeric($producto['id'])?$producto['id']:die(json_encode($returnObj));
@@ -154,7 +157,7 @@
 			$stmtProducto->close();
 		}
 		foreach ($pedir as $key => $area) {
-			if(strcmp($key, 'Barra')==0){
+			if(stristr($key, 'Barra')){
 				try{
 					$connector = new FilePrintConnector("/dev/usb/lp0");
 					$printer = new Escpos($connector);
@@ -181,7 +184,7 @@
 					*/
 					$returnObj['errorImpresion'] = 1;
 				}
-			}else if(strcmp($key, 'Cocina')==0){
+			}else if(stristr($key, 'Cocina')==0){
 				try{
 					$connector = new FilePrintConnector("/dev/usb/lp0");
 					$printer = new Escpos($connector);
