@@ -47,10 +47,10 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
 <?php
-    if(isset($_SESSION['user'])){
+    if(isset($_SESSION['data']['User']['idUsuario'])){
 ?>
             <form class="navbar-form navbar-right" role="form" action="signout.php" method="POST">
-                <label class="label label-primary"><?php echo $_SESSION['nombre']?> | <?php echo $_SESSION['user']?></label>
+                <label class="label label-primary"><?php echo $_SESSION['data']['User']['nombres']?> | <?php echo $_SESSION['data']['User']['idUsuario']?></label>
                 <button type="submit" class="btn btn-success">Salir</button>
             </form>
 <?php

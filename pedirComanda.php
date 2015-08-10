@@ -13,7 +13,7 @@
 		'errorImpresion' => 0
 		);
 
-	$idUsuario = isset($_SESSION['user'])?(is_numeric($_SESSION['user'])?$_SESSION['user']:NULL):NULL;
+	$idUsuario = isset($_SESSION['data']['User']['idUsuario'])?(is_numeric($_SESSION['data']['User']['idUsuario'])?$_SESSION['data']['User']['idUsuario']:NULL):NULL;
 
 	if($idUsuario == NULL){
 		/**

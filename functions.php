@@ -49,7 +49,7 @@
 		*	Verifica si hay una sesion activa
 		*/
 		public static function isLoged(){
-			return isset($_SESSION['user']);
+			return isset($_SESSION['data']['User']['idUsuario']);
 		}
 
 		/**
@@ -74,41 +74,18 @@
 				return false;
 			}
 
-			$userMdl = new BaseMdl();
+			$data = BaseCtrl::getUser($user, $pass);
 
-			$_user	= is_numeric($user)?$user:NULL;
-			$_pass	= $userMdl->driver->real_escape_string($pass);
+			print_r($data);
 
-			$stmt = $userMdl->driver->prepare("SELECT * FROM Usuario WHERE idUsuario = ? AND activo = 1");
-			if(!$stmt->bind_param('i',$_user)){
-				//No se pudo bindear el nombre, error en la base de datos
-			}else if (!$stmt->execute()) {
-				//No se pudo ejecutar, error en la base de datos
+			if($data['Error']==true){
+				return false;
 			}else{
-				$result = $stmt->get_result();
-				if($result->field_count > 0){
-					$result = $result->fetch_array();
-					if(strcmp($result['password'],$pass)==0){
-						session_set_cookie_params(0);
-						session_start();
-						//md5(md5("1234")."astrum1234".md5("astr"))
-						//b956f5207a5f0bfa514292171f1c285f
-						$_SESSION['user'] = $user;
-						$_SESSION['nombre'] = $result['nombres'];
-						//$_SESSION['pass'] = $pass;
-						$_SESSION['type'] = $result['idTipoDeCuenta'];
-						return true;
-					}else{
-						//Cargar vista de fallo de contraseña
-						
-					}
-				}else{
-					//No se encontró usuario con ese nombre :(
-					
-				}
+				session_set_cookie_params(0);
+				session_start();
+				$_SESSION['data'] = $data;
+				return true;
 			}
-			
-			return false;
 		}
 
 		/**
@@ -198,7 +175,9 @@
 					}
 				}
 			}
-
+			if($output['Error'] == false){
+				unset($output['User']['password']);
+			}
 			return $output;
 		}
 

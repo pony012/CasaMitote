@@ -15,97 +15,29 @@
 	}
 </style>
 <script src="bower_components/Sortable/Sortable.min.js"></script>
-
-	<div class="row">
-		<!--
-		<div class="col-md-4">
-			<h2>Heading</h2>
-			<pre><?php print_r(BaseCtrl::getUser(9810,"testRoot")); ?></pre>
-			<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-		</div>
-		<div class="col-md-4">
-			<h2>Heading</h2>
-			<pre><?php print_r(BaseCtrl::getUser(1000,"testGerente")); ?></pre>
-			<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-		 	</div>
-		<div class="col-md-4">
-			<h2>Heading</h2>
-			<pre><?php print_r(BaseCtrl::getUser(1000,"testRoot")); ?></pre>
-			<p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-		</div>
-		-->
-	</div>
-
 	<hr>
 
 	<div class="row">
 		<div class="col-xs-6">
-			<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-<?php
-	$baseMdl = new BaseMdl();
-
-	$stmt = $baseMdl->driver->prepare("SELECT * FROM TiposProductos");
-	
-	if (!$stmt->execute()) {
-	}else{
-		$result = $stmt->get_result();
-		if($result->field_count > 0){
-			$i = 0;
-			while($row = $result->fetch_array(MYSQLI_ASSOC)){
-?>
-				<div class="panel panel-default">
-					<div class="panel-heading" role="tab" id="heading<?php echo $i?>">
-						<h4 class="panel-title">
-							<a role="button" class="panel-handle" data-toggle="collapse" href="#collapse<?php echo $i ?>" aria-expanded="true" aria-controls="collapse<?php echo $i ?>">
-							<?php echo $row['nombre']?>
-							</a>
-						</h4>
-					</div>
-					<div id="collapse<?php echo $i ?>" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading<?php echo $i?>">
-						<ul id="simpleListSrc<?php echo $i?>" class="list-group src-list">
-<?php 
-				$baseMdl2 = new BaseMdl();
-
-				$stmt2 = $baseMdl2->driver->prepare("SELECT * FROM Productos WHERE idTipoProducto = {$row['idTipoProducto']} AND activo = 1");
-				
-				if (!$stmt2->execute()) {
-				}else{
-					$result2 = $stmt2->get_result();
-					if($result2->field_count > 0){
-						while($producto = $result2->fetch_array(MYSQLI_ASSOC)){
-?>
-								<li class="list-group-item">
-									<div class="row" data-id="<?php echo $producto['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="">
-										<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
-										<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
-										<div class="col-xs-3 botones hide">
-											<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
-											<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
-										</div>
-									</div>
-								</li>
-<?php
-						}
-					}
-				}
-?>
-						</ul>
-					</div>
-				</div>
-<?php
-				$i++;
-			}
-		}
-	}
-?>
-			</div>
 			<div class="row">
 				<div class="col-xs-12 mesasActivasContainer">
 					
 				</div>
 			</div>
+			<div>
+				<div class="row" style="margin-bottom: 15px;">
+					<div class="text-center col-xs-4">
+						<button class="btn btn-warning recuperarCuenta" data-toggle="modal" data-target="#modalRecuperarCuenta">Recuperar Cuenta</button>
+					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success pedirCuenta">Imprimir Cuenta</button>
+					</div>
+					<div class="text-center col-xs-4">
+						<button class="btn btn-success cobrarCuenta">Pagar Cuenta</button>
+					</div>
+				</div>
+			</div>
 		</div>
-
 		<div class="col-xs-6">
 <?php
 	if(isset($_SESSION['data']['User']['idUsuario'])){
@@ -117,7 +49,11 @@
 		$cuentaSeleccionada = isset($_GET['cuenta'])?$_GET['cuenta']:NULL;
 		$seleccionadas		= isset($_GET['ids'])?explode(',', $_GET['ids']):array();
 
-		$stmt = $cuentaMdl->driver->prepare("SELECT * FROM Cuentas WHERE pagada = 0 AND activa = 1");
+		$stmt = $cuentaMdl->driver->prepare("SELECT C.*, U.nombres FROM 
+												Cuentas AS C LEFT JOIN
+												Usuario AS U ON C.idUsuario = U.idUsuario
+												WHERE pagada = 1 AND activa = 1 AND fechaHora >= NOW() - INTERVAL 23 HOUR
+												ORDER BY fechaHora DESC");
 		$mesas = [];
 		if (!$stmt->execute()) {
 		}else{
@@ -132,11 +68,10 @@
 						data-seleccionada="<?php echo $cuentaSeleccionada==$cuenta['idCuenta']||in_array($cuenta['idCuenta'], $seleccionadas)?1:0; ?>"
 						data-active="<?php echo $cuentaSeleccionada==$cuenta['idCuenta']?1:0;?>"
 						data-nombre="<?php echo $cuenta['nombre'];?>" 
-						data-grupo="<?php echo $cuenta['grupo'];?>"
-						data-iter="0"
 						data-comentario="<?php echo $cuenta['comentario'];?>"
-						data-id="<?php echo $cuenta['idCuenta'];?>">
-					<h4 class="tituloCuenta" style="display: inline"><?php echo $cuenta['nombre'];?></h4>
+						data-id="<?php echo $cuenta['idCuenta'];?>"
+						data-tiempo="<?php echo $cuenta['fechaHora']?>">
+					<h4 class="tituloCuenta" style="display: inline"><?php echo $cuenta['nombre'];?> <small><?php echo $cuenta['fechaHora']?> / <?php echo $cuenta['nombres']?></small></h4>
 					<div class="radio-inline">
 						<label>
 							<input type="radio" name="cuentaActivaRadio" <?php if($cuentaSeleccionada==$cuenta['idCuenta']){echo 'checked="checked"';}?>> Activa
@@ -144,7 +79,6 @@
 					</div>
 					<div class="botones" style="display: inline; margin-left:15px;">
 						<button class="btn btn-xs <?php echo strlen($cuenta['comentario'])>0?'btn-success':'btn-info';?> btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
-						<button class="btn btn-xs btn-danger btn-elimianr hide"><span class="glyphicon glyphicon-remove"></span></button>
 					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 <?php 
@@ -172,8 +106,7 @@
 								<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
 								<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
 								<div class="col-xs-3 botones">
-									<button class="btn btn-xs btn-info btn-comentario hide" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
-									<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
+									<button class="btn btn-xs <?php echo strlen($producto['comentario'])>0?'btn-success':'btn-info';?> btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
 								</div>
 							</div>
 						</li>
@@ -224,30 +157,6 @@
 						<div class="col-xs-3">
 							<p class="total" data-total="0">0</p>
 						</div>
-					</div>
-				</div>
-			</div>
-			<div>
-				<div class="row" style="margin-bottom: 15px;">
-					<div class="text-center col-xs-4">
-						<button class="btn btn-primary agregarCuenta" data-toggle="modal" data-target="#modalNuevaCuenta" >Agregar Cuenta</button>
-					</div>
-					<div class="text-center col-xs-4">
-						<button class="btn btn-primary dividirCuenta" >Dividir Cuenta</button>
-					</div>
-					<div class="text-center col-xs-4">
-						<button class="btn btn-warning juntarCuentas" data-toggle="modal" data-target="#modalJuntarCuentas">Juntar Cuentas</button>
-					</div>
-				</div>
-				<div class="row" style="margin-bottom: 15px;">
-					<div class="text-center col-xs-4">
-						<button class="btn btn-success pedirComanda">Imprimir Comanda</button>
-					</div>	
-					<div class="text-center col-xs-4">
-						<button class="btn btn-success pedirCuenta">Imprimir Cuenta</button>
-					</div>
-					<div class="text-center col-xs-4">
-						<button class="btn btn-success cobrarCuenta">Pagar Cuenta</button>
 					</div>
 				</div>
 			</div>
@@ -417,7 +326,6 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-						<button type="submit" class="btn btn-success">Aplicar Comentario</button>
 					</div>
 				</form>
 			</div>
@@ -494,7 +402,7 @@
 			</div>
 		</div>
 	</div>
-	<script src="cuenta.js"></script>
+	<script src="cuentasPasadas.js"></script>
 <?php
 	include_once 'footer.php';
 ?>
