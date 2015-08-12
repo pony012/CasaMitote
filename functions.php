@@ -76,8 +76,6 @@
 
 			$data = BaseCtrl::getUser($user, $pass);
 
-			print_r($data);
-
 			if($data['Error']==true){
 				return false;
 			}else{
