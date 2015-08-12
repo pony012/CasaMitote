@@ -206,20 +206,34 @@ $(function(){
 		$("#modalComentario").modal('show');
 	});
 
+	$('.recuperarCuenta').on('click touchstart', function(){
+		var lista = $('.listas-secundarias[data-active=1]');
+		if(lista.length!=0){
+			var idCuenta = lista.attr('data-id');
+	 		var modal = $("#modalLogin");
+	 		var alertContainer = modal.find(".alert");
+	 		alertContainer.html("Se va a recuperar la cuenta:<br>"+$('.btn-primary[data-id='+idCuenta+']').html());
+	 		alertContainer.parent().removeClass('hide');
+	 		modal.attr("data-idCuenta", idCuenta);
+	 		modal.attr("data-accion", "recuperarCuenta");
+	 		modal.modal("show");
+		}
+ 	});
+
 	$("#formLogin").submit(function(e){
 		e.preventDefault();
 		var modal = $(this).closest(".modal");
 		var accion = modal.attr("data-accion");
-		if(accion=="eliminarProducto"){
-			var datos = $(this).serialize() + '&' + $.param({'idProducto':modal.attr("data-idProducto"),'idCuenta':modal.attr("data-idCuenta")});
+		if(accion=="recuperarCuenta"){
+			var datos = $(this).serialize() + '&' + $.param({'idCuenta':modal.attr("data-idCuenta")});
 			$.ajax({
 				type: "POST",
 				dataType: "json",
-				url: "eliminarProductoCuenta.php",
+				url: "recuperarCuenta.php",
 				data: datos,
 				success: function(data){
 					if(data.ok){
-						window.location.href = '?cuenta='+data.selec;
+						window.location.href = 'cuenta.php?cuenta='+data.selec;
 					}else{
 						var alertContainer = modal.find(".alert");
 						if(data.error.code == 5 || data.error.code == 6){
