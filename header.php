@@ -48,11 +48,17 @@
         <div id="navbar" class="navbar-collapse collapse">
 <?php
     if(isset($_SESSION['data']['User']['idUsuario'])){
-?>
+?> 
             <form class="navbar-form navbar-right" role="form" action="signout.php" method="POST">
                 <label class="label label-primary"><?php echo $_SESSION['data']['User']['nombres']?> | <?php echo $_SESSION['data']['User']['idUsuario']?></label>
                 <button type="submit" class="btn btn-success">Salir</button>
             </form>
+            <div class="navbar-form navbar-right">
+                <a href="cuentasPasadas.php" class="btn btn-primary">Cuentas Pasadas</a>
+            </div>
+            <div class="navbar-form navbar-right">
+                <a href="cuenta.php" class="btn btn-primary">Cuentas Activas</a>
+            </div>
 <?php
     }else{
 ?>
