@@ -25,7 +25,7 @@
 	$idProducto = isset($_POST['idProducto'])?(is_numeric($_POST['idProducto'])?$_POST['idProducto']:NULL):NULL;
 	$idCuenta 	= isset($_POST['idCuenta'])?(is_numeric($_POST['idCuenta'])?$_POST['idCuenta']:NULL):NULL;
 	
-	if($user == NULL || $idProducto == NULL || $idProducto == NULL){
+	if($user == NULL || $idCuenta == NULL || $idProducto == NULL){
 		$returnObj['error'] = array('code'=>5,'description'=>'Id de cuenta inválida');
 		echo json_encode($returnObj);
 		exit;
