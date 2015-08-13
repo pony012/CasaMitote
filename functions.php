@@ -106,7 +106,7 @@
 		
 			$result = $stmt->get_result();
 			if($result->field_count > 0){
-				$result = $result->fetch_array();
+				$result = $result->fetch_array(MYSQLI_ASSOC);
 				if(strcmp($result['password'],$pass)==0){
 					$output['User'] = $result;
 
@@ -132,24 +132,24 @@
 					$stmt->bind_param('i',$result['idTipoDeCuenta']);
 					$stmt->execute();
 					$cuentaPadre = $stmt->get_result();
-					$cuentaPadre = $cuentaPadre->fetch_array();
+					$cuentaPadre = $cuentaPadre->fetch_array(MYSQLI_ASSOC);
 
 					while(!is_null($cuentaPadre['idTipoDeCuentaPadre']) && !$found){
 						$stmt = $userMdl->driver->prepare("SELECT * FROM Usuario WHERE idTipoDeCuenta = ? AND password = ?");
-						$stmt->bind_param('is',$cuentaPadre['idTipoDeCuentaPadre'], $pass);
+						$stmt->bind_param('is',$cuentaPadre['idTipoDeCuentaPadre'], $_pass);
 						$stmt->execute();
 						$user = $stmt->get_result();
-						
-						if($user->field_count > 0){
-							$user = $user->fetch_array();
+						$user = $user->fetch_array(MYSQLI_ASSOC);
+						if($user){
+							//$user = $user->fetch_array();
 							$found = true;
 						}else{
 							$steps++;
 							$stmt = $userMdl->driver->prepare("SELECT idTipoDeCuentaPadre FROM TiposDeCuentas WHERE idTipoDeCuenta = ?");
-							$stmt->bind_param('i',$user['idTipoDeCuenta']);
+							$stmt->bind_param('i',$cuentaPadre['idTipoDeCuentaPadre']);
 							$stmt->execute();
 							$cuentaPadre = $stmt->get_result();
-							$cuentaPadre = $cuentaPadre->fetch_array();
+							$cuentaPadre = $cuentaPadre->fetch_array(MYSQLI_ASSOC);
 						}
 					}
 					if($found){
