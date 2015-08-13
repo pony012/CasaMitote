@@ -1,6 +1,13 @@
 var comentando = null;
 
 $(function(){
+
+	var pedirLogin = function(){
+		$(".modal").modal("hide");
+		$("#modalLogin").attr("data-accion", "pedirLogin");
+ 		$("#modalLogin").modal("show");
+	}
+
 	$.each($('.src-list'), function(k,v){
 		Sortable.create(v, {
 			group: {
@@ -129,10 +136,7 @@ $(function(){
 							callback(param);
 						}
 					}else if(data.pedirLogin){
-						/**
-						* TODO
-						* Abrir panel de login y hacer petición ajax, después re-pedir la comanda (si fue logueado con éxito).
-						*/
+						pedirLogin();
 					}
 				},
 				error: function(e){
@@ -271,7 +275,7 @@ $(function(){
 						}
 						window.location.href = '#';
 					}else if(data.pedirLogin){
-						
+						pedirLogin();
 					}
 				},
 				error: function(e){
@@ -335,7 +339,7 @@ $(function(){
 						if(data.ok){
 							window.location.href = '?'+'&ei='+data.errorImpresion;
 						}else if(data.pedirLogin){
-							
+							pedirLogin();
 						}
 					},
 					error: function(e){
@@ -504,6 +508,29 @@ $(function(){
 							//Otro error
 							alertContainer.parent().removeClass("hide");
 							alertContainer.html("Hubo un error");
+						}
+					}
+				},
+				error: function(e){
+					console.log(e.message);
+				}
+			});
+		}else if(accion=="pedirLogin"){
+			var datos = $(this).serialize();
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "pedirLogin.php",
+				data: datos,
+				success: function(data){
+					if(data.ok){
+						$("#modalLogin").modal("hide");
+					}else{
+						var alertContainer = modal.find(".alert");
+						if(data.error.code == 5 || data.error.code == 6){
+							alertContainer.parent().removeClass("hide");
+							alertContainer.html("No se pudo acceder");
+							//No se pudo acceder
 						}
 					}
 				},
