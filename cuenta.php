@@ -1,4 +1,5 @@
 <?php
+	error_reporting(E_ALL);
 	include_once 'header.php';
 ?>
 <div id="alert-container">
@@ -12,6 +13,11 @@
 	a.panel-handle{
 	display: block;
 	width: 100%;
+	}
+	.categorias-productos{
+		overflow: auto;
+		padding-right: 60px;
+		padding-left: 60px;
 	}
 </style>
 <script src="bower_components/Sortable/Sortable.min.js"></script>
@@ -40,7 +46,7 @@
 
 	<div class="row">
 		<div class="col-xs-6">
-			<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+			<div class="panel-group categorias-productos" id="accordion" role="tablist" aria-multiselectable="true">
 <?php
 	$baseMdl = new BaseMdl();
 
@@ -53,7 +59,7 @@
 			$i = 0;
 			while($row = $result->fetch_array(MYSQLI_ASSOC)){
 ?>
-				<div class="panel panel-default">
+				<div class="panel panel-success">
 					<div class="panel-heading" role="tab" id="heading<?php echo $i?>">
 						<h4 class="panel-title">
 							<a role="button" class="panel-handle" data-toggle="collapse" href="#collapse<?php echo $i ?>" aria-expanded="true" aria-controls="collapse<?php echo $i ?>">
@@ -61,7 +67,7 @@
 							</a>
 						</h4>
 					</div>
-					<div id="collapse<?php echo $i ?>" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading<?php echo $i?>">
+					<div id="collapse<?php echo $i ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?php echo $i?>">
 						<ul id="simpleListSrc<?php echo $i?>" class="list-group src-list">
 <?php 
 				$baseMdl2 = new BaseMdl();
@@ -75,10 +81,10 @@
 						while($producto = $result2->fetch_array(MYSQLI_ASSOC)){
 ?>
 								<li class="list-group-item">
-									<div class="row" data-id="<?php echo $producto['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="">
+									<div class="row" data-id="<?php echo $producto['idProducto']?>" data-area="<?php echo $row['area']?>" data-pedido="0" data-comentario="<?php echo $producto['comentario']?>">
 										<div class="col-xs-6 nombre"><?php echo $producto['nombre']?></div>
 										<div class="col-xs-3 precio"><?php echo $producto['precio']?></div>
-										<div class="col-xs-3 botones hide">
+										<div class="col-xs-3 botones">
 											<button class="btn btn-xs btn-info btn-comentario" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
 											<button class="btn btn-xs btn-danger btn-eliminar"><span class="glyphicon glyphicon-remove"></span></button>
 										</div>
