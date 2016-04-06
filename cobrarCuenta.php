@@ -96,7 +96,7 @@
 	$monto2			= isset($_POST['monto2'])?(is_numeric($_POST['monto2'])?$_POST['monto2']:NULL):NULL;
 	$montoTotal		= $monto1 + $monto2;
 
-	if($montoTotal > $totalAPagar){
+	if($montoTotal >= $totalAPagar){
 		$sobra = $montoTotal - $totalAPagar;
 		$pagoEfectivo = 0;
 		$pagoTarjeta = 0;
