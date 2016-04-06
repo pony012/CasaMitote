@@ -1,5 +1,6 @@
 <?php
-
+	error_reporting(E_ALL);
+	date_default_timezone_set('America/Mexico_City');
 	/**
 	* Modelo Base
 	* Clase base para los modelos que serán usados en la aplicación
