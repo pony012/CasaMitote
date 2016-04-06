@@ -1,10 +1,11 @@
 <?php
 	include_once 'functions.php';
 	include_once 'escpos-php/Escpos.php';
+header('Content-Type: application/json');
 	session_start();
 
 	$cuentas = $_POST['cuentas'];
-
+	$saltos = "\n \n \n \n \n \n ";
 	$returnObj = array(
 		'ok' => false,
 		'selec' => NULL,
@@ -161,6 +162,7 @@
 				try{
 					$connector = new FilePrintConnector("/dev/usb/lp0");
 					$printer = new Escpos($connector);
+					$printer -> text($saltos);
 					$printer -> text(str_pad($cuenta['nombre'], 32, " ", STR_PAD_BOTH)."\n");
 					$printer -> text(str_pad($fechaHora, 32, " ", STR_PAD_BOTH)."\n");
 					if(!empty($cuenta['comentario'])){
@@ -188,6 +190,7 @@
 				try{
 					$connector = new FilePrintConnector("/dev/usb/lp0");
 					$printer = new Escpos($connector);
+					$printer -> text($saltos);
 					$printer -> text(str_pad($cuenta['nombre'], 32, " ", STR_PAD_BOTH)."\n");
 					$printer -> text(str_pad($fechaHora, 32, " ", STR_PAD_BOTH)."\n");
 					if(!empty($cuenta['comentario'])){

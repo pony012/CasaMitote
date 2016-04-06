@@ -119,7 +119,8 @@
 		$letras = strtoupper($letras->ValorEnLetras($totalAPagar,"pesos")); 
 		$printer -> text(mb_str_pad($letras, 32, " ", STR_PAD_BOTH, 'UTF-8'));
 		$printer -> text("\n\n");
-
+		$printer -> text(mb_str_pad("La cuenta no incluye propina ;)", 32, " ", STR_PAD_BOTH, 'UTF-8'));
+		$printer -> text("\n\n");
 		$printer -> text(mb_str_pad("Gracias por su preferencia :)", 32, " ", STR_PAD_BOTH, 'UTF-8'));
 		$printer -> text("\n");
 
