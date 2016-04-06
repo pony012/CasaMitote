@@ -2,6 +2,11 @@ var comentando = null;
 
 $(function(){
 
+	ajustarAlto = function(){
+		$(".categorias-productos").css({height: window.innerHeight-300});
+	}
+	ajustarAlto();
+
 	var pedirLogin = function(){
 		$(".modal").modal("hide");
 		$("#modalLogin").attr("data-accion", "pedirLogin");
