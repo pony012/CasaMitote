@@ -1,0 +1,63 @@
+{
+  "name": "gps_sensor",
+  "version": "1.0.0",
+  "description": "concept test",
+  "main": "gulpfile.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/rmn528/gps_sensor.git"
+  },
+  "author": "Ramon Lozano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/rmn528/gps_sensor/issues"
+  },
+  "homepage": "https://gitlab.com/rmn528/gps_sensor#README",
+  "devDependencies": {
+    "autoprefixer": "^6.3.3",
+    "babel-core": "^6.7.0",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-plugin-react-html-attrs": "^2.0.0",
+    "babel-plugin-transform-class-properties": "^6.6.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-react-constant-elements": "^6.5.0",
+    "babel-plugin-transform-react-inline-elements": "^6.6.5",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "css-loader": "^0.23.1",
+    "exports-loader": "^0.6.3",
+    "expose-loader": "^0.7.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.8.5",
+    "glob": "^7.0.3",
+    "img-loader": "^1.2.2",
+    "imports-loader": "^0.6.5",
+    "modernizr": "^3.3.1",
+    "node-sass": "^3.4.2",
+    "path": "^0.12.7",
+    "postcss-loader": "^0.8.1",
+    "precss": "^1.4.0",
+    "sass-loader": "^3.1.2",
+    "source-map-loader": "^0.1.5",
+    "style-loader": "^0.13.0",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.12.14"
+  },
+  "dependencies": {
+    "backbone": "^1.3.2",
+    "jquery": "^2.2.1",
+    "lodash": "^4.6.1",
+    "materialize-css": "^0.97.5",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "react-tap-event-plugin": "^0.2.2"
+  }
+}
