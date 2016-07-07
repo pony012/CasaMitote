@@ -35,6 +35,7 @@ $(function(){
 				var itemEl = evt.item;	// dragged HTMLElement
 				var jEl = $(itemEl);
 				var subTotal = 0;
+				var total = 0;
 				var totalContainer = null;
 				if($(evt.from).hasClass("simpleList")){
 					totalContainer = $(evt.from).parent().find(".total-cuenta");
@@ -43,8 +44,18 @@ $(function(){
 				 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 				 	totalContainer.find(".sub-total").html(subTotal);
 
-				 	totalContainer.find(".total").attr('data-total', subTotal);
-				 	totalContainer.find(".total").html(subTotal);
+				 	
+				 	
+					if(jEl.parent().parent().attr("data-descuento")){
+						if(jEl.parent().parent().attr("data-tipoDescuento")==1){
+							total = subTotal - jEl.parent().parent().attr("data-descuento");
+						}else{
+							total = subTotal - jEl.parent().parent().attr("data-descuento")/100*subTotal;
+						}
+					}
+
+				 	totalContainer.find(".total").attr('data-total', total);
+				 	totalContainer.find(".total").html(total);
 				}
 
 			 	var ul = $(itemEl).parent();
@@ -58,24 +69,41 @@ $(function(){
 			 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 			 	totalContainer.find(".sub-total").html(subTotal);
 
-			 	totalContainer.find(".total").attr('data-total', subTotal);
-			 	totalContainer.find(".total").html(subTotal);
+			 	if(jEl.parent().parent().attr("data-descuento")){
+					if(jEl.parent().parent().attr("data-tipoDescuento")==1){
+						total = subTotal - jEl.parent().parent().attr("data-descuento");
+					}else{
+						total = subTotal - jEl.parent().parent().attr("data-descuento")/100*subTotal;
+					}
+				}
+
+			 	totalContainer.find(".total").attr('data-total', total);
+			 	totalContainer.find(".total").html(total);
 
 			 	if(jEl.children().attr("data-pedido")==0){
 			 		jEl.find(".botones").removeClass("hide");
 			 	}
 			 	jEl.find('.btn-eliminar').on('click touchstart', function(){
+
+			 		var subTotal = parseFloat(totalContainer.find(".sub-total").attr('data-subtotal')) - parseFloat(jEl.find('.precio').html());
+
+			 		if(jEl.parent().parent().attr("data-descuento")){
+						if(jEl.parent().parent().attr("data-tipoDescuento")==1){
+							total = subTotal - jEl.parent().parent().attr("data-descuento");
+						}else{
+							total = subTotal - jEl.parent().parent().attr("data-descuento")/100*subTotal;
+						}
+					}
+				 	
+				 	totalContainer.find(".total").attr('data-total', total);
+				 	totalContainer.find(".total").html(total);
+
 			 		jEl.closest('.listas-secundarias').find("[name=cuentaActivaRadio]").prop("checked", true).change();
 
 			 		jEl.remove();
-			 		
-			 		var subTotal = parseFloat(totalContainer.find(".sub-total").attr('data-subtotal')) - parseFloat(jEl.find('.precio').html());
 			 	
 				 	totalContainer.find(".sub-total").attr('data-subtotal', subTotal);
 				 	totalContainer.find(".sub-total").html(subTotal);
-
-				 	totalContainer.find(".total").attr('data-total', subTotal);
-				 	totalContainer.find(".total").html(subTotal);
 			 	});
 
 			 	var listaOrigen = $(evt.from).closest(".listas-secundarias"),
@@ -105,12 +133,14 @@ $(function(){
 					comentario 		= parent.attr("data-comentario").replace(/<br \/>/g, "\n");
 					id				= parent.attr("data-id");
 				var cuenta = {
-								nombre		: parent.attr("data-nombre"),
-								grupo		: parent.attr("data-grupo"),
-								comentario	: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
-								id			: parent.attr("data-id"),
-								productos	: [],
-								selec		: nombreSelec == parent.attr("data-nombre")?1:0
+								nombre			: parent.attr("data-nombre"),
+								grupo			: parent.attr("data-grupo"),
+								comentario		: parent.attr("data-comentario").replace(/<br \/>/g, "\n"),
+								descuento		: parent.attr("data-descuento"),
+								tipoDescuento	: parent.attr("data-tipoDescuento"),
+								id				: parent.attr("data-id"),
+								productos		: [],
+								selec			: nombreSelec == parent.attr("data-nombre")?1:0
 							};
 				$.each(ulActivo.find("li"), function(k,v){
 					var producto = $(v).children();
@@ -247,6 +277,7 @@ $(function(){
 				$.each(ulActivo.find("li"), function(k,v){
 					tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
 				});
+				tabla.parent().find(".descuento-tabla").html(ulActivo.parent().find(".descuentoValue").html());
 				tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
 				tabla.parent().find(".sub-total").html(ulActivo.parent().find(".sub-total").html());
 			}
@@ -305,6 +336,7 @@ $(function(){
 				$.each(ulActivo.find("li"), function(k,v){
 					tabla.append("<tr><td>"+$(v).find(".nombre").html()+"</td><td>"+$(v).find(".precio").html()+"</td><td></td><td></td></tr>");
 				});
+				tabla.parent().find(".descuento-tabla").html(ulActivo.parent().find(".descuentoValue").html());
 				tabla.parent().find(".total").html(ulActivo.parent().find(".total").html());
 				$("#sobra").html(-ulActivo.parent().find(".total").html());
 				$("#sobra").addClass('text-danger');
@@ -417,10 +449,19 @@ $(function(){
 		if(element.attr("data-cuenta") == 1){
 			var nombreCuenta = element.closest('.listas-secundarias').find('.tituloCuenta').html();
 			$("#labelComentario").html(nombreCuenta);
+			$(".descuento-cuenta").removeClass("hide");
+			$("#descuento").val(element.closest('[data-descuento]').attr("data-descuento"));
+			var tipoDesc = element.closest('[data-tipoDescuento]').attr("data-tipoDescuento");
+			if(tipoDesc==0){//$
+				$("[name=tipoDescuento][value=0]").prop("checked", true);
+			}else{//%
+				$("[name=tipoDescuento][value=1]").prop("checked", true);
+			}
 		}else{
 			var nombreProducto = element.closest('li').find('.nombre').html();
 			var nombreCuenta = element.closest('[data-nombre]').attr("data-nombre");
 			$("#labelComentario").html(nombreCuenta +" | "+ nombreProducto);
+			$(".descuento-cuenta").addClass("hide");
 		}
 		$("#comentario").val(element.closest('[data-comentario]').attr("data-comentario").replace(/<br \/>/g, "\n"));
 		$("#modalComentario").modal('show');
@@ -429,6 +470,29 @@ $(function(){
 	$("#ingresarComentario").submit(function(e){
 		e.preventDefault();
 		comentando.parent().parent().attr("data-comentario", $("#comentario").val());
+		comentando.parent().parent().attr("data-descuento", $("#descuento").val());
+		comentando.parent().parent().attr("data-tipoDescuento", $("[name=tipoDescuento]:checked").val());
+		var textoDescuento = "";
+		var subTotal = parseFloat(comentando.parent().parent().find("[data-subtotal]").attr("data-subtotal"));
+
+		//Cambiar Total de cuenta
+		if($("#descuento").val()){
+			if($("[name=tipoDescuento]:checked").val()==1){
+				total = subTotal - $("#descuento").val();
+			}else{
+				total = subTotal - $("#descuento").val()/100*subTotal;
+			}
+		}
+
+		comentando.parent().parent().find(".total").attr('data-total', total);
+		comentando.parent().parent().find(".total").html(total);
+
+		if($("[name=tipoDescuento]:checked").val()==1){
+			textoDescuento+="$ "+$("#descuento").val();
+		}else{
+			textoDescuento+=$("#descuento").val()+" %";
+		}
+		comentando.parent().parent().find(".descuentoValue").html(textoDescuento);
 		if($("#comentario").val().length > 0){
 			comentando.removeClass("btn-info");
 			comentando.addClass("btn-success");

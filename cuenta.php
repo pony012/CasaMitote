@@ -131,7 +131,7 @@
 			if($result->field_count > 0){
 				$i = 0;
 				while($cuenta = $result->fetch_array(MYSQLI_ASSOC)){
-					$total = 0;
+					$subTotal = 0;
 					$mesas[] = $cuenta;
 ?>
 				<div class="listas-secundarias col-xs-12"
@@ -141,6 +141,8 @@
 						data-grupo="<?php echo $cuenta['grupo'];?>"
 						data-iter="0"
 						data-comentario="<?php echo $cuenta['comentario'];?>"
+						data-descuento="<?php echo $cuenta['descuento'];?>"
+						data-tipoDescuento="<?php echo $cuenta['tipoDescuento'];?>"
 						data-id="<?php echo $cuenta['idCuenta'];?>">
 					<h4 class="tituloCuenta" style="display: inline"><?php echo $cuenta['nombre'];?></h4>
 					<div class="radio-inline">
@@ -151,6 +153,9 @@
 					<div class="botones" style="display: inline; margin-left:15px;">
 						<button class="btn btn-xs <?php echo strlen($cuenta['comentario'])>0?'btn-success':'btn-info';?> btn-comentario" data-cuenta="1" data-toggle="modal" data-target="#modalComentario"><span class="glyphicon glyphicon-pencil"></span></button>
 						<button class="btn btn-xs btn-danger btn-elimianr hide"><span class="glyphicon glyphicon-remove"></span></button>
+					</div>
+					<div class="descuento" style="display: inline; margin-left:15px;">
+						Descuento: <span class="descuentoValue"><?php if($cuenta['tipoDescuento']){echo "$";}; echo $cuenta['descuento']; if(!$cuenta['tipoDescuento']){echo "%";};?></span>
 					</div>
 					<ul class="list-group simpleList" style="border: 1px solid black; min-height: 30px;padding: 0px;">
 <?php 
@@ -167,7 +172,7 @@
 						$result2 = $stmt2->get_result();
 						if($result2->field_count > 0){
 							while($producto = $result2->fetch_array(MYSQLI_ASSOC)){
-								$total += $producto['precio'];
+								$subTotal += $producto['precio'];
 ?>
 						<li class="list-group-item" draggable="false">
 							<div class="row" 
@@ -188,6 +193,14 @@
 						}
 					}
 					$stmt2->close();
+
+					if($cuenta['descuento']){
+						if($cuenta['tipoDescuento']){
+							$total = $subTotal - $cuenta['descuento'];
+						}else{
+							$total = $subTotal - $cuenta['descuento']/100*$subTotal;
+						}
+					}
 ?>
 					</ul>
 					<div class="total-cuenta row">
@@ -195,7 +208,7 @@
 							<b>Total:</b>
 						</div>
 						<div class="col-xs-3">
-							<p class="sub-total" data-subtotal="<?php echo $total;?>"><?php echo $total;?></p>
+							<p class="sub-total" data-subtotal="<?php echo $subTotal;?>"><?php echo $subTotal;?></p>
 						</div>
 						<div class="col-xs-3">
 							<p class="total" data-total="<?php echo $total;?>"><?php echo $total;?></p>
@@ -289,6 +302,10 @@
 									<td class="sub-total"></td>
 								</tr>
 								<tr>
+									<td><b>Descuento</b></td>
+									<td class="descuento-tabla"></td>
+								</tr>
+								<tr>
 									<td><b>Total</b></td>
 									<td class="total"></td>
 								</tr>
@@ -328,6 +345,10 @@
 								<tr>
 									<td><b>Subtotal</b></td>
 									<td class="sub-total"></td>
+								</tr>
+								<tr>
+									<td><b>Descuento</b></td>
+									<td class="descuento-tabla"></td>
 								</tr>
 								<tr>
 									<td><b>Total</b></td>
@@ -420,6 +441,18 @@
 						<div class="form-group">
 							<textarea class="form-control" name="comentario" id="comentario" placeholder="Comentario..."></textarea>
 						</div>
+						<div class="input-group descuento-cuenta">
+							<input type="text" class="form-control" name="descuento" id="descuento" placeholder="0"></input>
+							<div class="input-group-btn">
+								<label class="btn btn-default btn-sm">
+									<input type="radio" name="tipoDescuento" value="0" checked="checked">%
+								</label>
+								<label class="btn btn-default btn-sm">
+									<input type="radio" name="tipoDescuento" value="1">$
+								</label>
+							</div>
+						</div>
+							
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>

@@ -1,7 +1,7 @@
 <?php
 	include_once 'functions.php';
 	include_once 'escpos-php/Escpos.php';
-header('Content-Type: application/json');
+	header('Content-Type: application/json');
 	session_start();
 
 	$cuentas = $_POST['cuentas'];
@@ -65,14 +65,16 @@ header('Content-Type: application/json');
 		$nombreCuenta 		= $baseMdl->driver->real_escape_string($cuenta['nombre']);
 		$grupo 				= $baseMdl->driver->real_escape_string($cuenta['grupo']);
 		$comentarioCuenta	= $baseMdl->driver->real_escape_string(str_replace(array("\r\n", "\r", "\n"), "<br />",$cuenta['comentario']));
+		$tipoDescuento		= is_numeric($cuenta['tipoDescuento'])?$cuenta['tipoDescuento']:0;
+		$descuento			= is_numeric($cuenta['descuento'])?$cuenta['descuento']:0;
 		$idCuenta			= isset($cuenta['id'])?(is_numeric($cuenta['id'])?$cuenta['id']:NULL):NULL;
 		$fechaHora			= date("Y-m-d H:i:s");
 		$activa				= count($cuenta['productos'])>0?1:0;
 
 		if($idCuenta == NULL && $activa == 1){
-			$stmtCuenta = $baseMdl->driver->prepare("INSERT INTO Cuentas(idUsuario, fechaHora, pagada, activa, nombre, grupo, comentario)
-																VALUES(?, ?, 0, 1, ?, ?, ?)");
-			if(!$stmtCuenta->bind_param('issss',$idUsuario, $fechaHora, $nombreCuenta, $grupo, $comentarioCuenta)){
+			$stmtCuenta = $baseMdl->driver->prepare("INSERT INTO Cuentas(idUsuario, fechaHora, pagada, activa, nombre, grupo, comentario, tipoDescuento, descuento)
+																VALUES(?, ?, 0, 1, ?, ?, ?, ?, ?)");
+			if(!$stmtCuenta->bind_param('issssii',$idUsuario, $fechaHora, $nombreCuenta, $grupo, $comentarioCuenta, $tipoDescuento, $descuento)){
 				$returnObj['error'] = array('code'=>4,'description'=>'Error en bind_param de insert en Cuentas');
 				echo json_encode($returnObj);
 				exit;
@@ -88,9 +90,9 @@ header('Content-Type: application/json');
 			$stmtCuenta->close();
 		}else{
 			$stmtCuenta = $baseMdl->driver->prepare("UPDATE Cuentas 
-														SET fechaHora = ?, comentario = ?, activa = ?
+														SET fechaHora = ?, comentario = ?, activa = ?, tipoDescuento = ?, descuento = ?
 														WHERE idCuenta = ?");
-			if(!$stmtCuenta->bind_param('ssii', $fechaHora, $comentarioCuenta, $activa, $idCuenta)){
+			if(!$stmtCuenta->bind_param('ssiiii', $fechaHora, $comentarioCuenta, $activa, $tipoDescuento, $descuento, $idCuenta)){
 				$returnObj['error'] = array('code'=>4,'description'=>'Error en bind_param de update en Cuentas');
 				echo json_encode($returnObj);
 				exit;
