@@ -24,7 +24,10 @@
 	}
 
 	$idCuenta		= isset($_POST['idCuenta'])?(is_numeric($_POST['idCuenta'])?$_POST['idCuenta']:NULL):NULL;
+	$subTotalAPagar = 0;
 	$totalAPagar	= 0;
+	$tieneDescuento = false;
+	$descuentoEfec 	= 0;
 	$fechaHora		= date("Y-m-d H:i:s");
 	setlocale(LC_MONETARY, 'es_MX');
 
@@ -34,7 +37,7 @@
 		exit;
 	}else{
 		$cuentaMdl = new BaseMdl();
-		$stmtCuenta = $cuentaMdl->driver->prepare("SELECT U.nombres, C.nombre, C.idCuenta FROM `Cuentas` AS C
+		$stmtCuenta = $cuentaMdl->driver->prepare("SELECT U.nombres, C.nombre, C.idCuenta, C.descuento, C.tipoDescuento FROM `Cuentas` AS C
 													LEFT JOIN Usuario AS U ON U.idUsuario = C.idUsuario 
 													WHERE idCuenta = ?");
 		if(!$stmtCuenta->bind_param('i',$idCuenta)){
@@ -77,7 +80,26 @@
 				$productos = array();
 				while($row = $result->fetch_array(MYSQLI_ASSOC)){
 					$productos[] = $row;
-					$totalAPagar += $row['precio'] * $row['cantidad'];
+					$subTotalAPagar += $row['precio'] * $row['cantidad'];
+				}
+				if($cuenta['descuento']){
+					$tieneDescuento = true;
+					if($cuenta['tipoDescuento']){//$
+						if($subTotalAPagar - $cuenta['descuento'] > 0)
+							$totalAPagar = $subTotalAPagar - $cuenta['descuento'];
+						else
+							$totalAPagar = 0;
+					}else{//%
+						$descuentoEfec = $subTotalAPagar*$cuenta['descuento']/100;
+						if($subTotalAPagar - $descuentoEfec > 0)
+							$totalAPagar = $subTotalAPagar - $descuentoEfec;
+						else{
+							$totalAPagar = 0;
+							$descuentoEfec = $subTotalAPagar;
+						}
+					}
+				}else{
+					$totalAPagar = $subTotalAPagar;
 				}
 			}else{
 				$returnObj['error'] = array('code'=>4,'description'=>'No existen productos en la cuenta '.$idCuenta);
@@ -108,8 +130,18 @@
 		$printer -> text("\n");
 
 		$printer -> text(mb_str_pad('Subtotal', 20, '.',STR_PAD_RIGHT, 'UTF-8'));
-		$printer -> text(mb_str_pad('$'.money_format('%i',$totalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));
+		$printer -> text(mb_str_pad('$'.money_format('%i',$subTotalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));
 		$printer -> text("\n");
+
+		/*AÑADIR MENSAJE DESCUENTO*/
+		if($tieneDescuento){
+			$printer -> text(mb_str_pad('Descuento', 16, '.',STR_PAD_RIGHT, 'UTF-8'));
+			if($descuentoEfec)
+				$printer -> text(mb_str_pad($cuenta['descuento'].'% (-$'.money_format('%i',$descuentoEfec).')', 16, '.',STR_PAD_LEFT, 'UTF-8'));
+			else
+				$printer -> text(mb_str_pad('-$'.money_format('%i',$descuentoEfec), 16, '.',STR_PAD_LEFT, 'UTF-8'));
+			$printer -> text("\n");
+		}
 
 		$printer -> text(mb_str_pad('Total', 20, '.',STR_PAD_RIGHT, 'UTF-8'));
 		$printer -> text(mb_str_pad('$'.money_format('%i',$totalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));

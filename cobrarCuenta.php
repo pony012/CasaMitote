@@ -24,7 +24,10 @@
 	}
 
 	$idCuenta		= isset($_POST['idCuenta'])?(is_numeric($_POST['idCuenta'])?$_POST['idCuenta']:NULL):NULL;
+	$subTotalAPagar = 0;
 	$totalAPagar	= 0;
+	$tieneDescuento = false;
+	$descuentoEfec 	= 0;
 	$fechaHora		= date("Y-m-d H:i:s");
 	setlocale(LC_MONETARY, 'es_MX');
 
@@ -34,7 +37,7 @@
 		exit;
 	}else{
 		$cuentaMdl = new BaseMdl();
-		$stmtCuenta = $cuentaMdl->driver->prepare("SELECT U.nombres, C.nombre, C.idCuenta FROM `Cuentas` AS C
+		$stmtCuenta = $cuentaMdl->driver->prepare("SELECT U.nombres, C.nombre, C.idCuenta, C.descuento, C.tipoDescuento FROM `Cuentas` AS C
 													LEFT JOIN Usuario AS U ON U.idUsuario = C.idUsuario 
 													WHERE idCuenta = ?");
 		if(!$stmtCuenta->bind_param('i',$idCuenta)){
@@ -59,9 +62,33 @@
 		$stmtCuenta->close();
 
 		$productosMdl = new BaseMdl();
+		/*
 		$stmtProductos = $productosMdl->driver->prepare("SELECT PC.idProducto, P.precio, PC.cantidad, P.nombre FROM `ProductosCuenta` AS PC
 															LEFT JOIN Productos AS P ON PC.idProducto = P.idProducto
 															WHERE idCuenta = ? ORDER BY PC.idProductoCuenta");
+		*/
+		$stmtProductos = $productosMdl->driver->prepare("SELECT 
+															idCuenta, 
+															PC.idProducto, 
+															P.precio, 
+															P.nombre,
+															count(PC.idProducto) as cantidad,
+															sum(P.precio) as total
+														FROM 
+															`ProductosCuenta` AS PC
+														INNER JOIN
+															(
+																SELECT 
+																	idProducto,
+																	nombre,
+																	precio
+																FROM 
+																	Productos
+															) AS P
+														ON PC.idProducto = P.idProducto
+														WHERE idCuenta = ?
+														GROUP BY P.idProducto
+														ORDER BY PC.idProductoCuenta");
 		if(!$stmtProductos->bind_param('i',$idCuenta)){
 			$returnObj['error'] = array('code'=>4,'description'=>'Error en bind_param de select de productos');
 			echo json_encode($returnObj);
@@ -77,7 +104,26 @@
 				$productos = array();
 				while($row = $result->fetch_array(MYSQLI_ASSOC)){
 					$productos[] = $row;
-					$totalAPagar += $row['precio'] * $row['cantidad'];
+					$subTotalAPagar += $row['total'];
+				}
+				if($cuenta['descuento']){
+					$tieneDescuento = true;
+					if($cuenta['tipoDescuento']){//$
+						if($subTotalAPagar - $cuenta['descuento'] > 0)
+							$totalAPagar = $subTotalAPagar - $cuenta['descuento'];
+						else
+							$totalAPagar = 0;
+					}else{//%
+						$descuentoEfec = $subTotalAPagar*$cuenta['descuento']/100;
+						if($subTotalAPagar - $descuentoEfec > 0)
+							$totalAPagar = $subTotalAPagar - $descuentoEfec;
+						else{
+							$totalAPagar = 0;
+							$descuentoEfec = $subTotalAPagar;
+						}
+					}
+				}else{
+					$totalAPagar = $subTotalAPagar;
 				}
 			}else{
 				$returnObj['error'] = array('code'=>4,'description'=>'No existen productos en la cuenta '.$idCuenta);
@@ -123,7 +169,7 @@
 														pagoTotal = ?,
 														sobra = ?
 													WHERE idCuenta = ?");
-		if(!$stmtACuenta->bind_param('ddddddi', $totalAPagar, $totalAPagar, $pagoEfectivo, $pagoTarjeta, $montoTotal, $sobra, $idCuenta)){
+		if(!$stmtACuenta->bind_param('ddddddi', $subTotalAPagar, $totalAPagar, $pagoEfectivo, $pagoTarjeta, $montoTotal, $sobra, $idCuenta)){
 			$returnObj['error'] = array('code'=>4,'description'=>'Error en bind_param de select de aCuenta');
 			echo json_encode($returnObj);
 			exit;
@@ -145,18 +191,29 @@
 			$printer -> text(mb_str_pad('Mesa: '.$cuenta['nombre'].' Mesero: '.$cuenta['nombres'], 32, " ", STR_PAD_BOTH, 'UTF-8')."\n");
 			$printer -> text(mb_str_pad($fechaHora, 32, " ", STR_PAD_BOTH, 'UTF-8')."\n");
 			foreach ($productos as $key => $producto) {
-				$producto['nombre'] = substr($producto['nombre'], 0, 20);
+				$producto['nombre'] = substr(mb_str_pad($producto['cantidad'], 2, '0',STR_PAD_LEFT, 'UTF-8').'x'.$producto['nombre'], 0, 20);
 				
 				$printer -> text(mb_str_pad($producto['nombre'], 20, '.',STR_PAD_RIGHT, 'UTF-8'));
-				$printer -> text(mb_str_pad('$'.money_format('%i',$producto['precio']), 12, '.',STR_PAD_LEFT, 'UTF-8'));
+				$printer -> text(mb_str_pad('$'.money_format('%i',$producto['total']), 12, '.',STR_PAD_LEFT, 'UTF-8'));
 				$printer -> text("\n");
 				
 			}
 			$printer -> text("\n");
 
 			$printer -> text(mb_str_pad('Subtotal', 20, '.',STR_PAD_RIGHT, 'UTF-8'));
-			$printer -> text(mb_str_pad('$'.money_format('%i',$totalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));
+			$printer -> text(mb_str_pad('$'.money_format('%i',$subTotalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));
 			$printer -> text("\n");
+
+			/*AÑADIR MENSAJE DESCUENTO*/
+			if($tieneDescuento){
+				$printer -> text(mb_str_pad('Descuento', 16, '.',STR_PAD_RIGHT, 'UTF-8'));
+				if($descuentoEfec){
+					$printer -> text(mb_str_pad($cuenta['descuento'].'% (-$'.money_format('%i',$descuentoEfec).')', 16, '.',STR_PAD_LEFT, 'UTF-8'));
+				}else{
+					$printer -> text(mb_str_pad('-$'.money_format('%i',$descuentoEfec), 16, '.',STR_PAD_LEFT, 'UTF-8'));
+				}
+				$printer -> text("\n");
+			}
 
 			$printer -> text(mb_str_pad('Total', 20, '.',STR_PAD_RIGHT, 'UTF-8'));
 			$printer -> text(mb_str_pad('$'.money_format('%i',$totalAPagar), 12, '.',STR_PAD_LEFT, 'UTF-8'));
